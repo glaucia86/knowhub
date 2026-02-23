@@ -1,5 +1,11 @@
 # KnowHub AI Assistant
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Node >=20](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![npm >=9](https://img.shields.io/badge/npm-%3E%3D9-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/)
+[![CI](https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/glaucia86/knowhub-ai-assistant)](https://github.com/glaucia86/knowhub-ai-assistant/releases)
+
 Second brain open source com IA local-first para capturar, organizar e consultar conhecimento pessoal com privacidade.
 
 ## Visão do Projeto
