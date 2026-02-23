@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-label="KnowHub AI Assistant Banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070b16"/>
+      <stop offset="55%" stop-color="#141d33"/>
+      <stop offset="100%" stop-color="#251438"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#dbeafe" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1400" height="420" rx="24" fill="url(#bg)"/>
+  <rect width="1400" height="420" rx="24" fill="url(#grid)"/>
+
+  <g opacity="0.22" fill="none" stroke="url(#stroke)" stroke-width="2">
+    <path d="M80 334 C236 242, 346 338, 500 256 S776 168, 916 238 1144 302, 1310 214"/>
+    <path d="M80 360 C232 292, 364 378, 522 306 S802 218, 944 288 1168 350, 1310 286"/>
+  </g>
+
+  <g fill="#f8fafc" font-family="Sora, Segoe UI, Inter, Arial, sans-serif">
+    <text x="84" y="126" font-size="18" font-weight="600" letter-spacing="2.2" fill="#c4b5fd">FUTURE-READY KNOWLEDGE ENGINE</text>
+    <text x="84" y="184" font-size="64" font-weight="700">KnowHub AI Assistant</text>
+    <text x="84" y="234" font-size="24" fill="#e2e8f0">Your private second brain powered by contextual AI.</text>
+    <text x="84" y="268" font-size="20" fill="#bfdbfe">Local-first • Privacy-first • Open Source</text>
+  </g>
+
+  <g>
+    <rect x="84" y="296" width="350" height="54" rx="27" fill="#0f172a" stroke="#67e8f9" stroke-opacity="0.65"/>
+    <text x="112" y="330" font-family="Sora, Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="600" fill="#eef2ff">AI Assistant + Brain</text>
+  </g>
+</svg>

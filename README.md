@@ -1,7 +1,12 @@
 # KnowHub AI Assistant
 
 <p align="center">
-  <strong>Second brain local-first com IA para capturar, conectar e consultar conhecimento pessoal.</strong>
+  <img src="resources/banner.svg" alt="KnowHub AI Assistant Banner" width="900"/>
+</p>
+
+<p align="center">
+  <strong>Second brain local-first com IA para capturar, conectar e consultar conhecimento pessoal.</strong><br/>
+  <sub>Open source • Privacidade por padrão • Monorepo TypeScript</sub>
 </p>
 
 <p align="center">
@@ -30,9 +35,11 @@
 
 <p align="center">
   <a href="#overview">Overview</a> •
+  <a href="#highlights">Highlights</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#commands">Commands</a> •
   <a href="#project-structure">Project Structure</a> •
+  <a href="#roadmap-now">Roadmap Now</a> •
   <a href="#documentation">Documentation</a> •
   <a href="#contributing">Contributing</a>
 </p>
@@ -41,7 +48,10 @@
 
 ## Overview
 
-KnowHub AI Assistant foi desenhado para reduzir o caos de informação pessoal: notas, links, PDFs e insights espalhados em múltiplos lugares.
+KnowHub reduz o caos de informação pessoal: notas, links, PDFs e insights espalhados em múltiplos lugares.
+
+> [!IMPORTANT]
+> **Local-first + privacidade por padrão**: nada vai para cloud sem consentimento explícito.
 
 Princípios do projeto:
 
@@ -58,6 +68,17 @@ Estado atual:
 
 ---
 
+## Highlights
+
+| Area                | Status | Description                                                        |
+| ------------------- | ------ | ------------------------------------------------------------------ |
+| Monorepo foundation | ✅     | Apps `api`, `web`, `cli` + `shared-types`/`shared-utils`           |
+| Core quality gates  | ✅     | `lint`, `build` (core), `pre-commit` with `lint-staged`            |
+| Web local run       | ⚠️     | Pode exigir execução isolada em Windows + OneDrive (`spawn EPERM`) |
+| Specification docs  | ✅     | Produto, técnica e épicos documentados em `docs-specs/`            |
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -65,14 +86,25 @@ Estado atual:
 - Node.js `>=20`
 - npm `>=9`
 
-### Install and run
+### 1) Install and run core
 
 ```bash
 npm install
 npm run build         # core build (api/cli/shared)
-npm run dev           # core dev
-npm run dev:web       # web dev em terminal separado
 npm run lint
+```
+
+### 2) Run dev
+
+```bash
+npm run dev           # core dev
+npm run dev:web       # web dev (separado)
+```
+
+### 3) Optional full build
+
+```bash
+npm run build:all
 ```
 
 ### Windows + OneDrive note
@@ -89,17 +121,15 @@ Quando isso acontecer:
 
 ## Commands
 
-```bash
-npm run build         # build core
-npm run build:web     # build web only
-npm run build:all     # build core + web
-
-npm run dev           # dev core
-npm run dev:web       # dev web
-npm run dev:all       # tenta subir tudo
-
-npm run lint          # lint all workspaces
-```
+| Goal                | Command             |
+| ------------------- | ------------------- |
+| Build core          | `npm run build`     |
+| Build web only      | `npm run build:web` |
+| Build all           | `npm run build:all` |
+| Dev core            | `npm run dev`       |
+| Dev web             | `npm run dev:web`   |
+| Dev all             | `npm run dev:all`   |
+| Lint all workspaces | `npm run lint`      |
 
 CLI quick check:
 
@@ -126,6 +156,14 @@ knowhub/
 ├── specs/
 └── scripts/
 ```
+
+---
+
+## Roadmap Now
+
+- EPIC-0.1: monorepo e tooling base
+- EPIC-0.2+: CI/CD, ambiente local, governança open source
+- Fase seguinte: evolução do MVP funcional (captura + query + conexões)
 
 ---
 
