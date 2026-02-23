@@ -1,0 +1,19 @@
+{
+  "name": "@knowhub/cli",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "knowhub": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsc -p tsconfig.json --watch",
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"no tests\"",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@knowhub/shared-types": "0.1.0",
+    "@knowhub/shared-utils": "0.1.0",
+    "commander": "^12.0.0"
+  }
+}

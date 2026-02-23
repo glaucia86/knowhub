@@ -1,0 +1,19 @@
+{
+  "name": "@knowhub/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node dist/main.js",
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"no tests\"",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@knowhub/shared-types": "0.1.0",
+    "@knowhub/shared-utils": "0.1.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.4.22",
+    "reflect-metadata": "^0.2.0"
+  }
+}

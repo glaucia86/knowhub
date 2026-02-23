@@ -1,0 +1,24 @@
+# Code Style
+
+## TypeScript
+
+- Keep strict typing where possible.
+- Avoid `any` unless justified.
+- Prefer small, explicit interfaces for shared contracts.
+
+## Lint and Format
+
+- Lint command: `npm run lint`
+- Formatter: Prettier (`.prettierrc`)
+- ESLint config: `eslint.config.js`
+
+## Pre-commit Gate
+
+- Hook: `.husky/pre-commit`
+- Command: `npx lint-staged`
+- Scope: staged files only
+
+## Commit Hygiene
+
+- Exclude caches/artifacts (`.turbo/`, `.npm-cache/`, `.next/`, `dist/`, `coverage/`).
+- Keep workspace-specific changes grouped when possible.
