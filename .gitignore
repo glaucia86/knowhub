@@ -1,1 +1,21 @@
 docs-specs
+specs/
+
+# Added by implementation
+node_modules/
+dist/
+build/
+.turbo/
+.npm-cache/
+.codex/
+.next/
+coverage/
+*.tsbuildinfo
+*.log
+.env*
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.idea/
+.specify/
