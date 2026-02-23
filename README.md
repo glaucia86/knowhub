@@ -1,44 +1,116 @@
 # KnowHub AI Assistant
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Node >=20](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![npm >=9](https://img.shields.io/badge/npm-%3E%3D9-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/)
-[![CI](https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/glaucia86/knowhub-ai-assistant)](https://github.com/glaucia86/knowhub-ai-assistant/releases)
+<p align="center">
+  <strong>Second brain local-first com IA para capturar, conectar e consultar conhecimento pessoal.</strong>
+</p>
 
-Second brain open source com IA local-first para capturar, organizar e consultar conhecimento pessoal com privacidade.
+<p align="center">
+  <a href="https://github.com/glaucia86/knowhub-ai-assistant/stargazers">
+    <img src="https://img.shields.io/github/stars/glaucia86/knowhub-ai-assistant?style=for-the-badge&logo=github" alt="Stars"/>
+  </a>
+  <a href="https://github.com/glaucia86/knowhub-ai-assistant/network/members">
+    <img src="https://img.shields.io/github/forks/glaucia86/knowhub-ai-assistant?style=for-the-badge&logo=github" alt="Forks"/>
+  </a>
+  <a href="https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml">
+    <img src="https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml/badge.svg?style=for-the-badge" alt="CI"/>
+  </a>
+  <a href="https://github.com/glaucia86/knowhub-ai-assistant/releases">
+    <img src="https://img.shields.io/github/v/release/glaucia86/knowhub-ai-assistant?style=for-the-badge" alt="Latest Release"/>
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>
+  </a>
+  <a href="https://nodejs.org/">
+    <img src="https://img.shields.io/badge/node-%3E%3D20-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node"/>
+  </a>
+  <a href="https://www.npmjs.com/">
+    <img src="https://img.shields.io/badge/npm-%3E%3D9-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="npm"/>
+  </a>
+</p>
 
-## Visão do Projeto
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#commands">Commands</a> •
+  <a href="#project-structure">Project Structure</a> •
+  <a href="#documentation">Documentation</a> •
+  <a href="#contributing">Contributing</a>
+</p>
 
-O KnowHub AI Assistant nasce para resolver um problema comum: conhecimento espalhado em notas, links, PDFs, issues e conversas.  
-A proposta é centralizar esse conteúdo e permitir busca/conexões inteligentes sem depender de cloud por padrão.
+---
+
+## Overview
+
+KnowHub AI Assistant foi desenhado para reduzir o caos de informação pessoal: notas, links, PDFs e insights espalhados em múltiplos lugares.
 
 Princípios do projeto:
 
-- Local-first: roda localmente por padrão.
-- Privacidade por padrão: nada vai para cloud sem consentimento explícito.
-- Open source: código, roadmap e evolução guiados pela comunidade.
-- Inteligência prática: foco em fluxo real de uso, não em demo.
+- Local-first por padrão
+- Privacidade por padrão
+- Open source orientado à comunidade
+- IA útil no fluxo real de trabalho
 
-## Status Atual
+Estado atual:
 
-Este repositório está na fase de fundação do monorepo (EPIC-0.1), com:
+- Monorepo base implementado (EPIC-0.1)
+- Apps: API, Web, CLI
+- Pacotes compartilhados de tipos e utilitários
 
-- `apps/api` (NestJS)
-- `apps/web` (Next.js)
-- `apps/cli` (CLI)
-- `packages/shared-types`
-- `packages/shared-utils`
+---
 
-## Stack
+## Quick Start
 
-- Node.js + TypeScript
-- Turborepo + npm workspaces
-- NestJS (API)
-- Next.js (Web)
-- ESLint + Prettier + Husky + lint-staged
+### Prerequisites
 
-## Estrutura do Repositório
+- Node.js `>=20`
+- npm `>=9`
+
+### Install and run
+
+```bash
+npm install
+npm run build         # core build (api/cli/shared)
+npm run dev           # core dev
+npm run dev:web       # web dev em terminal separado
+npm run lint
+```
+
+### Windows + OneDrive note
+
+`apps/web` pode falhar com `spawn EPERM` em alguns ambientes Windows/OneDrive.
+
+Quando isso acontecer:
+
+1. rode `npm run dev` para core
+2. rode `npm run dev:web` separado
+3. use `npm run build:web` como validação condicional local
+
+---
+
+## Commands
+
+```bash
+npm run build         # build core
+npm run build:web     # build web only
+npm run build:all     # build core + web
+
+npm run dev           # dev core
+npm run dev:web       # dev web
+npm run dev:all       # tenta subir tudo
+
+npm run lint          # lint all workspaces
+```
+
+CLI quick check:
+
+```bash
+npm run build -w @knowhub/cli
+node apps/cli/dist/index.js setup-check
+```
+
+---
+
+## Project Structure
 
 ```text
 knowhub/
@@ -55,76 +127,37 @@ knowhub/
 └── scripts/
 ```
 
-## Pré-requisitos
+---
 
-- Node.js `>=20`
-- npm `>=9`
+## Quality Gates
 
-## Quick Start
+- Lint: `npm run lint`
+- Pre-commit: `npx lint-staged` via `.husky/pre-commit`
+- CI: `.github/workflows/ci.yml` (lint + core build)
 
-```bash
-npm install
-npm run build         # build core (api/cli/shared)
-npm run dev           # dev core
-npm run dev:web       # web em terminal separado
-npm run lint
-```
+---
 
-Comandos úteis:
+## Documentation
 
-```bash
-npm run build:web     # build somente web
-npm run build:all     # build core + web
-npm run dev:all       # tenta subir tudo junto
-```
+- Product vision (non-technical): `docs-specs/spec-nao-tecnica.md`
+- Technical specification: `docs-specs/spec-tecnica.md`
+- Epics and stories: `docs-specs/epicos.md`
 
-## Nota para Windows + OneDrive
+---
 
-Em alguns ambientes Windows/OneDrive, `apps/web` pode falhar com `spawn EPERM` durante `next build`.
-
-Fluxo recomendado nesses casos:
-
-1. usar `npm run dev` para o core
-2. usar `npm run dev:web` em terminal separado
-3. tratar `npm run build:web` como validação condicional no ambiente local
-
-## CLI
-
-Build do CLI:
-
-```bash
-npm run build -w @knowhub/cli
-```
-
-Teste rápido:
-
-```bash
-node apps/cli/dist/index.js setup-check
-```
-
-## Qualidade de Código
-
-- Lint global: `npm run lint`
-- Hook de pre-commit: `npx lint-staged` via `.husky/pre-commit`
-- Configuração ativa de lint: `eslint.config.js` (flat config)
-
-## Documentação do Produto
-
-- Visão não técnica: `docs-specs/spec-nao-tecnica.md`
-- Especificação técnica: `docs-specs/spec-tecnica.md`
-- Épicos e histórias: `docs-specs/epicos.md`
-
-## Contribuição
+## Contributing
 
 Contribuições são bem-vindas.
 
-Fluxo sugerido:
+Fluxo recomendado:
 
-1. Crie uma branch a partir de `main`
-2. Faça alterações pequenas e focadas
-3. Rode `npm run lint` e `npm run build`
-4. Abra PR com contexto claro do problema e da solução
+1. crie branch a partir de `main`
+2. mantenha PRs pequenas e focadas
+3. rode `npm run lint` e `npm run build`
+4. abra PR com contexto, impacto e validação
 
-## Licença
+---
+
+## License
 
 MIT
