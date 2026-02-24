@@ -91,10 +91,12 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload coverage to Codecov
-        if: ${{ always() && secrets.CODECOV_TOKEN != '' }}
+        if: ${{ always() && env.CODECOV_TOKEN != '' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ./coverage/lcov.info,./apps/**/coverage/lcov.info,./packages/**/coverage/lcov.info
           fail_ci_if_error: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           verbose: false
