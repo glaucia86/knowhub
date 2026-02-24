@@ -21,5 +21,5 @@ Describe objectively what was changed and why.
 
 - [ ] Scope focused on a clear objective
 - [ ] Impacts and risks described
-- [ ] NNo changes outside the expected domain
+- [ ] No changes outside the expected domain
 - [ ] Repository templates and conventions respected
