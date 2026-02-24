@@ -90,14 +90,30 @@ jobs:
             **/coverage/coverage-final.json
           if-no-files-found: ignore
 
+      - name: Detect coverage files
+        if: always()
+        id: coverage-check
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          files=(**/coverage/lcov.info)
+          if [ ${#files[@]} -gt 0 ]; then
+            echo "has_coverage=true" >> "$GITHUB_OUTPUT"
+            echo "Found coverage files:"
+            printf '%s\n' "${files[@]}"
+          else
+            echo "has_coverage=false" >> "$GITHUB_OUTPUT"
+            echo "No coverage files found. Skipping Codecov upload."
+          fi
+
       - name: Upload coverage to Codecov
-        if: ${{ always() && env.CODECOV_TOKEN != '' }}
+        if: ${{ always() && env.CODECOV_TOKEN != '' && steps.coverage-check.outputs.has_coverage == 'true' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info,./apps/**/coverage/lcov.info,./packages/**/coverage/lcov.info
+          files: '**/coverage/lcov.info'
           fail_ci_if_error: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           verbose: false
 
