@@ -14,6 +14,6 @@
   "dependencies": {
     "@knowhub/shared-types": "0.1.0",
     "@knowhub/shared-utils": "0.1.0",
-    "commander": "^12.0.0"
+    "commander": "^14.0.3"
   }
 }
