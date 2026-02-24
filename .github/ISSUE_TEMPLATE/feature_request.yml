@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest improvements with clear value for users/the community.
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Opportunity
+      placeholder: What pain does this proposal address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      placeholder: Describe the proposed solution.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Considered Alternatives
+      placeholder: What other options did you evaluate?
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected Impact
+      placeholder: How does this improve the project for users/maintainers?

@@ -1,0 +1,37 @@
+name: Stale Management
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Mark and close stale issues/PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run stale policy
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          days-before-pr-stale: 21
+          days-before-pr-close: 7
+          stale-issue-message: >
+            This item has had no recent activity and has been marked as stale.
+            Comment here to reactivate.
+          stale-pr-message: >
+            This PR has had no recent activity and has been marked as stale.
+            Comment here to reactivate.
+          close-issue-message: >
+            Closing automatically due to inactivity.
+          close-pr-message: >
+            Closing automatically due to inactivity.
+          exempt-issue-labels: 'security,critical,onboarding,pinned'
+          exempt-pr-labels: 'security,critical,onboarding,pinned'
+          remove-stale-when-updated: true

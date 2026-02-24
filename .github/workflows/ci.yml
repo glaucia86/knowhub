@@ -2,13 +2,23 @@ name: CI
 
 on:
   push:
-    branches: [main, 001-spec-epic-0-1, fix/**]
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -26,5 +36,88 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
       - name: Build (core)
         run: npm run build
+
+  test:
+    name: Test and Coverage
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+      - name: Upload coverage artifacts (if available)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            **/coverage/lcov.info
+            **/coverage/coverage-final.json
+          if-no-files-found: ignore
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info,./apps/**/coverage/lcov.info,./packages/**/coverage/lcov.info
+          fail_ci_if_error: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          verbose: false
+
+  merge-gate:
+    name: Merge Gate
+    if: ${{ always() }}
+    needs: [lint, build, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Enforce required checks
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ]; then
+            echo "Lint failed or was cancelled."
+            exit 1
+          fi
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "Build failed or was cancelled."
+            exit 1
+          fi
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            echo "Tests failed or were cancelled."
+            exit 1
+          fi
+          echo "All required checks passed."
