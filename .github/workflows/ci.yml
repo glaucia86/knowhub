@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -44,10 +44,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -66,10 +66,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload coverage artifacts (if available)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-reports
           path: |
@@ -91,9 +91,10 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload coverage to Codecov
-        if: always()
-        uses: codecov/codecov-action@v4
+        if: ${{ always() && secrets.CODECOV_TOKEN != '' }}
+        uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info,./apps/**/coverage/lcov.info,./packages/**/coverage/lcov.info
           fail_ci_if_error: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           verbose: false
@@ -108,16 +109,20 @@ jobs:
     steps:
       - name: Enforce required checks
         run: |
+          echo "Lint status: ${{ needs.lint.result }}"
+          echo "Build status: ${{ needs.build.result }}"
+          echo "Test status: ${{ needs.test.result }}"
+
           if [ "${{ needs.lint.result }}" != "success" ]; then
-            echo "Lint failed or was cancelled."
+            echo "Lint did not succeed (status: ${{ needs.lint.result }})."
             exit 1
           fi
           if [ "${{ needs.build.result }}" != "success" ]; then
-            echo "Build failed or was cancelled."
+            echo "Build did not succeed (status: ${{ needs.build.result }})."
             exit 1
           fi
           if [ "${{ needs.test.result }}" != "success" ]; then
-            echo "Tests failed or were cancelled."
+            echo "Test and Coverage did not succeed (status: ${{ needs.test.result }})."
             exit 1
           fi
           echo "All required checks passed."
