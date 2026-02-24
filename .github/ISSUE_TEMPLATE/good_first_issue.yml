@@ -1,0 +1,24 @@
+name: Good first issue
+description: Propose an appropriate task for the first contribution.
+title: '[Good First Issue]: '
+labels: ['good first issue', 'onboarding']
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: Proposed Task
+      placeholder: Describe a small, focused task with a clear scope.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      placeholder: How to validate that the task is completed?
+    validations:
+      required: true
+  - type: textarea
+    id: hints
+    attributes:
+      label: Hints to Get Started
+      placeholder: Useful files/folders and commands for beginners.

@@ -1,0 +1,13 @@
+# Global fallback
+* @glaucia86
+
+# Monorepo ownership by domain
+/apps/api/ @glaucia86
+/apps/web/ @glaucia86
+/apps/cli/ @glaucia86
+/packages/shared-types/ @glaucia86
+/packages/shared-utils/ @glaucia86
+/docs/ @glaucia86
+/docs-specs/ @glaucia86
+/.github/ @glaucia86
+/scripts/ @glaucia86

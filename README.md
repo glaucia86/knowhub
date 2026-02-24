@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/github/forks/glaucia86/knowhub-ai-assistant?style=for-the-badge&logo=github" alt="Forks"/>
   </a>
   <a href="https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml">
-    <img src="https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml/badge.svg?style=for-the-badge" alt="CI"/>
+    <img src="https://github.com/glaucia86/knowhub-ai-assistant/actions/workflows/ci.yml/badge.svg?branch=main&style=for-the-badge" alt="CI"/>
   </a>
   <a href="https://github.com/glaucia86/knowhub-ai-assistant/releases">
     <img src="https://img.shields.io/github/v/release/glaucia86/knowhub-ai-assistant?style=for-the-badge" alt="Latest Release"/>
@@ -164,6 +164,22 @@ knowhub/
 - EPIC-0.1: monorepo e tooling base
 - EPIC-0.2+: CI/CD, ambiente local, governança open source
 - Fase seguinte: evolução do MVP funcional (captura + query + conexões)
+
+---
+
+## CI/CD and Contribution Status
+
+- CI obrigatório para `main`: lint -> build -> test -> merge gate.
+- Releases automáticos acionados apenas por tag semântica válida (`vX.Y.Z`).
+- Governança ativa: `CODEOWNERS`, templates de issue/PR e automações de stale/onboarding.
+- Dependabot semanal agrupado para manter segurança e estabilidade.
+
+Fluxo recomendado de contribuição:
+
+1. Abra branch curta e focada a partir de `main`.
+2. Execute localmente `npm run lint`, `npm run build` e `npm run test`.
+3. Abra PR usando o template padrão e inclua evidências de validação.
+4. Aguarde CI verde e revisão dos owners antes do merge.
 
 ---
 
