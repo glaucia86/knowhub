@@ -107,6 +107,80 @@ npm run dev:web       # web dev (separado)
 npm run build:all
 ```
 
+### 4) Local onboarding (EPIC-0.3)
+
+```bash
+npm run env:setup
+docker compose up -d
+npm run dev
+npm run dev:web
+```
+
+Checks:
+
+```bash
+curl http://localhost:3001/health
+curl http://localhost:3001/dev/environment/status
+curl http://localhost:11434/api/tags
+```
+
+Optional `make` targets:
+
+- `make env-setup`
+- `make dev`
+- `make down`
+- `make health`
+- `make ollama-pull`
+
+OS matrix:
+
+| OS             | Recommended flow                                                     |
+| -------------- | -------------------------------------------------------------------- |
+| Linux          | `make dev` or npm commands                                           |
+| macOS          | `make dev` or npm commands                                           |
+| Windows + WSL2 | npm commands (`npm run env:setup`, `npm run dev`, `npm run dev:web`) |
+
+### Database bootstrap and reproducible reset
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+Schema status and seed endpoints:
+
+```bash
+curl http://localhost:3001/dev/database/schema-version
+curl -X POST http://localhost:3001/dev/database/seed
+```
+
+Full reset flow:
+
+```bash
+npm run db:reset
+```
+
+The reset command removes `apps/api/local.db`, reapplies migrations and runs deterministic seed data.
+
+### Environment validation and external fallback
+
+Required API variables are validated on startup. If a required key is missing, API startup fails with an actionable message.
+
+Environment endpoints:
+
+```bash
+curl http://localhost:3001/dev/environment/variables
+curl -X POST http://localhost:3001/dev/environment/variables/validate \
+  -H "Content-Type: application/json" \
+  -d '{"workspace":"api","values":{"PORT":"3001","NODE_ENV":"development","DATABASE_URL":"./local.db","REDIS_URL":"redis://localhost:6379","OLLAMA_BASE_URL":"http://localhost:11434","ENABLE_EXTERNAL_AI":"false"}}'
+```
+
+External AI fallback:
+
+- default is local-first (`ENABLE_EXTERNAL_AI=false`)
+- when `ENABLE_EXTERNAL_AI=true`, API status reports a warning via `/dev/environment/status`
+- in external mode, set `EXTERNAL_AI_API_KEY`
+
 ### Windows + OneDrive note
 
 `apps/web` pode falhar com `spawn EPERM` em alguns ambientes Windows/OneDrive.

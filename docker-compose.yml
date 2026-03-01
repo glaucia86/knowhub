@@ -1,0 +1,34 @@
+name: knowhub-local
+
+services:
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: knowhub-valkey
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - valkey-data:/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: knowhub-ollama
+    ports:
+      - '11434:11434'
+    healthcheck:
+      test: ['CMD', 'ollama', 'list']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  valkey-data:
+  ollama-data:

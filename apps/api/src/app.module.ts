@@ -4,9 +4,10 @@ import { SharedAssetsController } from './modules/shared-assets/shared-assets.co
 import { SharedAssetsService } from './modules/shared-assets/shared-assets.service';
 import { QualityGatesController } from './modules/quality-gates/quality-gates.controller';
 import { QualityGatesService } from './modules/quality-gates/quality-gates.service';
+import { DevEnvironmentModule } from './modules/dev-environment/dev-environment.module';
 
 @Module({
-  imports: [ReadinessModule],
+  imports: [ReadinessModule, DevEnvironmentModule],
   controllers: [SharedAssetsController, QualityGatesController],
   providers: [SharedAssetsService, QualityGatesService],
 })
