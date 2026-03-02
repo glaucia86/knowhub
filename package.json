@@ -44,10 +44,10 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.0",
     "jsdom": "^28.1.0",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^16.3.1",
     "prettier": "^3.0.0",
     "roughjs": "^4.6.6",
-    "turbo": "^2.0.0",
+    "turbo": "^2.8.12",
     "typescript": "^5.0.0"
   },
   "lint-staged": {
