@@ -13,6 +13,11 @@ coverage/
 *.tsbuildinfo
 *.log
 .env*
+!.env.example
+!apps/api/.env.example
+!apps/web/.env.example
+apps/api/local.db
+apps/api/local.db-*
 .DS_Store
 Thumbs.db
 *.tmp
