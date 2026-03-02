@@ -2,6 +2,49 @@
 
 Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
+## [v0.3.0] - 2026-03-02
+
+### Added
+
+- Epic 0.3 de ambiente local com endpoints `/dev/*` para status, schema, seed e reset controlado.
+- Scripts dedicados para banco local: `db:migrate`, `db:seed` e `db:reset`.
+- Exemplos de configuracao de ambiente para bootstrap local.
+
+### Changed
+
+- Refactor no fluxo de migracao/boot do SQLite com controle de versao de schema e calculo de migrations pendentes.
+- Validacao de variaveis de ambiente com suporte a `defaultValue` e validacao em runtime dos payloads.
+- Gating de endpoints de desenvolvimento por ambiente para reduzir risco fora de `development`.
+
+### Fixed
+
+- Fluxo de bootstrap local em Windows/OneDrive com execucao mais robusta dos scripts Node.
+- Seeds de banco para comportamento deterministico.
+
+### Dependencies
+
+- Atualizacoes de dependencias de producao e desenvolvimento via Dependabot.
+- Atualizacoes de GitHub Actions (`checkout`, `setup-node`, `upload-artifact`, `stale`, `first-interaction`).
+
+### PR
+
+- `#11` Merge pull request #11 from `glaucia86/001-local-dev-environment`
+- `#10` Merge pull request #10 from `glaucia86/dependabot/npm_and_yarn/development-dependencies-9268cbf2e3`
+- `#9` Merge pull request #9 from `glaucia86/dependabot/npm_and_yarn/production-dependencies-a7374d9f9d`
+- `#8` Merge pull request #8 from `glaucia86/dependabot/github_actions/actions/upload-artifact-6`
+- `#7` Merge pull request #7 from `glaucia86/dependabot/github_actions/actions/stale-10`
+- `#6` Merge pull request #6 from `glaucia86/dependabot/github_actions/actions/checkout-6`
+- `#5` Merge pull request #5 from `glaucia86/dependabot/github_actions/actions/first-interaction-3`
+- `#4` Merge pull request #4 from `glaucia86/dependabot/github_actions/actions/setup-node-6`
+
+### Commits
+
+- `df2be8c` feat: add example environment configuration files for local development
+- `d371ab0` refactor: database migration handling and environment validation
+- `a970192` feat: add database migration, reset, and seed scripts
+- `ef5c436` chore(deps-dev): bump the development-dependencies group with 7 updates
+- `19e764c` chore(deps): bump the production-dependencies group with 7 updates
+
 ## [v0.2.1] - 2026-02-24
 
 ### Changed
