@@ -22,6 +22,8 @@
     "dev:all": "turbo run dev",
     "dev:local": "npm run env:setup && docker compose up -d && npm run dev",
     "env:setup": "node scripts/env-setup.js",
+    "gen:architecture": "node scripts/gen-architecture.mjs",
+    "gen:architecture-src": "node scripts/gen-architecture-excalidraw.mjs",
     "db:generate": "npm run db:generate -w @knowhub/api",
     "db:migrate": "npm run db:migrate -w @knowhub/api",
     "db:seed": "npm run db:seed -w @knowhub/api",
@@ -35,13 +37,16 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.0",
+    "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.0.0",
+    "roughjs": "^4.6.6",
     "turbo": "^2.0.0",
     "typescript": "^5.0.0"
   },

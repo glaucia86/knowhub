@@ -2,41 +2,31 @@
 
 ## Project
 
-KnowHub is a TypeScript monorepo with API, Web, CLI, and shared packages.
+KnowHub — TypeScript monorepo. Package manager: **npm** (workspaces from root).
 
-## Package Manager
+## Workspaces
 
-Use `npm` (workspaces enabled from the repository root).
+- `apps/api` — NestJS API
+- `apps/web` — Next.js 15
+- `apps/cli` — Commander.js CLI
+- `packages/shared-types` — cross-surface type contracts
+- `packages/shared-utils` — shared utilities
 
-## Fast Start (Non-Standard Commands)
+## Commands
 
-- Core build only (excludes web): `npm run build`
-- Full build (core + web): `npm run build:all`
-- Core dev only (excludes web): `npm run dev`
-- Web dev isolated: `npm run dev:web`
-
-## Repository Map
-
-- `apps/api`: NestJS API
-- `apps/web`: Next.js app
-- `apps/cli`: CLI
-- `packages/shared-types`: shared type contracts
-- `packages/shared-utils`: shared helper utilities
+- Lint: `npm run lint`
+- Build core (no web): `npm run build` · Full: `npm run build:all`
+- Dev core: `npm run dev` · Web only: `npm run dev:web`
 
 ## Rules
 
-- Keep `AGENTS.md` in repository root.
-- Prefer changes scoped to the affected workspace.
+- Scope changes to the affected workspace.
 - Run `npm run lint` before proposing final changes.
 
 ## Progressive Disclosure
 
-For detailed guidance, read these files only when needed:
+Read only when the task requires it:
 
-- `docs/agent/workflows.md` (build/dev flows, Windows + OneDrive behavior)
-- `docs/agent/code-style.md` (TypeScript, lint, formatting, commit gates)
-- `docs/agent/architecture.md` (workspace boundaries and integration points)
-
-## Last Updated
-
-2026-02-23
+- Build/dev issues, CI/CD, or Windows + OneDrive errors → `docs/agent/workflows.md`
+- TypeScript conventions, ESLint/Prettier config, or commit format → `docs/agent/code-style.md`
+- Changes spanning multiple workspaces or touching shared packages → `docs/agent/architecture.md`
