@@ -1,24 +1,60 @@
-name: Good first issue
-description: Propose an appropriate task for the first contribution.
+name: Good First Issue
+description: A curated issue for first-time contributors (used by maintainers)
 title: '[Good First Issue]: '
-labels: ['good first issue', 'onboarding']
+labels: ['good first issue', 'help wanted']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        👋 This issue is specifically curated for first-time contributors.
+        All the context you need to get started is provided below.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why does this issue exist? What problem does it solve?
+    validations:
+      required: true
+
   - type: textarea
     id: task
     attributes:
-      label: Proposed Task
-      placeholder: Describe a small, focused task with a clear scope.
+      label: Task Description
+      description: Exactly what needs to be done, with subtasks if applicable.
+      placeholder: |
+        - [ ] Subtask 1
+        - [ ] Subtask 2
+        - [ ] Subtask 3
     validations:
       required: true
+
   - type: textarea
-    id: acceptance
+    id: files
+    attributes:
+      label: Files to Change
+      description: Which files are likely to be modified?
+      placeholder: |
+        - `apps/api/src/...`
+        - `packages/shared-types/src/...`
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      placeholder: How to validate that the task is completed?
+      description: How do we know this issue is done?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Tests pass (`npm run test`)
+        - [ ] Lint passes (`npm run lint`)
     validations:
       required: true
+
   - type: textarea
-    id: hints
+    id: resources
     attributes:
-      label: Hints to Get Started
-      placeholder: Useful files/folders and commands for beginners.
+      label: Resources
+      description: Links to relevant documentation, ADRs, related code, or examples.

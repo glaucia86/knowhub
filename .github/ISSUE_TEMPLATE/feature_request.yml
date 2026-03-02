@@ -1,29 +1,50 @@
-name: Feature request
-description: Suggest improvements with clear value for users/the community.
+name: Feature Request
+description: Suggest a new feature or enhancement for KnowHub
 title: '[Feature]: '
-labels: ['enhancement']
+labels: ['feature']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe the problem you want to solve,
+        not just the solution — this helps us understand the need better.
+
   - type: textarea
     id: problem
     attributes:
-      label: Problem or Opportunity
-      placeholder: What pain does this proposal address?
+      label: Problem to Solve
+      description: What problem does this feature solve? Who is affected?
+      placeholder: 'As a developer, I find it difficult to... because...'
     validations:
       required: true
+
   - type: textarea
-    id: proposal
+    id: solution
     attributes:
-      label: Proposal
-      placeholder: Describe the proposed solution.
+      label: Proposed Solution
+      description: Describe the solution you'd like to see.
     validations:
       required: true
+
   - type: textarea
     id: alternatives
     attributes:
-      label: Considered Alternatives
-      placeholder: What other options did you evaluate?
-  - type: textarea
-    id: impact
+      label: Alternatives Considered
+      description: What other approaches did you consider? Why did you choose this one?
+
+  - type: dropdown
+    id: target-user
     attributes:
-      label: Expected Impact
-      placeholder: How does this improve the project for users/maintainers?
+      label: Target User
+      options:
+        - Developer (building on top of KnowHub)
+        - End User (using KnowHub to manage knowledge)
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Mockups, related issues, references, etc.

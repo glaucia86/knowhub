@@ -1,42 +1,85 @@
-name: Bug report
-description: Report misconduct with minimal evidence.
+name: Bug Report
+description: Report a bug or unexpected behavior in KnowHub
 title: '[Bug]: '
 labels: ['bug']
 body:
-  - type: textarea
-    id: context
+  - type: markdown
     attributes:
-      label: Context
-      description: What were you trying to do?
-      placeholder: Explain the scenario and the goal.
+      value: |
+        Thanks for taking the time to report a bug! Please fill out all required fields.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: 'When I do X, Y happens instead of Z.'
     validations:
       required: true
+
   - type: textarea
-    id: current_behavior
-    attributes:
-      label: Current Behavior
-      placeholder: What actually happened?
-    validations:
-      required: true
-  - type: textarea
-    id: expected_behavior
-    attributes:
-      label: Expected Behavior
-      placeholder: What should have happened?
-    validations:
-      required: true
-  - type: textarea
-    id: reproduction
+    id: steps
     attributes:
       label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the bug.
       placeholder: |
-        1. ...
-        2. ...
-        3. ...
+        1. Start the API with `npm run dev`
+        2. Open http://localhost:3000
+        3. Click on '...'
+        4. See error
     validations:
       required: true
-  - type: input
-    id: version
+
+  - type: textarea
+    id: expected
     attributes:
-      label: Version/commit
-      placeholder: ex. v0.1.0 or commit hash
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows (WSL2)
+        - Windows (native)
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      placeholder: 'e.g. 22.11.0 (run: node --version)'
+
+  - type: input
+    id: knowhub-version
+    attributes:
+      label: KnowHub Version / Commit SHA
+      placeholder: 'e.g. v0.1.0 or commit abc1234'
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Stack Trace
+      description: Paste any relevant logs here (optional but very helpful)
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or information.

@@ -1,25 +1,32 @@
-## Summary
+## Description
 
-Describe objectively what was changed and why.
+<!-- Describe what this PR does and why. Be concise but complete. -->
 
-## Change Type
+## Type of Change
 
-- [ ] Feature
-- [ ] Fix
-- [ ] Refactor
-- [ ] Documentation
-- [ ] CI/CD
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
+- [ ] Breaking change (fix or feature that changes existing behavior)
+- [ ] Documentation update
+- [ ] Refactoring (no functional changes)
+- [ ] Chore (dependency updates, config changes, etc.)
 
-## Validation
+## Related Issue
 
-- [ ] `npm run lint`
-- [ ] `npm run build`
-- [ ] `npm run test`
-- [ ] Evidence attached (logs, screenshots, or links)
+Closes #<!-- issue number -->
 
-## Governance Checklist
+## How to Test
 
-- [ ] Scope focused on a clear objective
-- [ ] Impacts and risks described
-- [ ] No changes outside the expected domain
-- [ ] Repository templates and conventions respected
+<!-- Step-by-step instructions for the reviewer to verify the changes -->
+
+1.
+2.
+3.
+
+## Checklist
+
+- [ ] `npm run lint` passes with no errors
+- [ ] `npm run test` passes with no failures
+- [ ] Tests added or updated for the changes made
+- [ ] Documentation updated (if applicable)
+- [ ] Commit messages follow [Conventional Commits](CONTRIBUTING.md#commit-convention)

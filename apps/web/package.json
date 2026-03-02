@@ -1,6 +1,7 @@
 {
   "name": "@knowhub/web",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "cross-env NEXT_DISABLE_SWC_WORKER=1 next dev",

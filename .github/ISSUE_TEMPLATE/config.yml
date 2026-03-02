@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions — Questions & Ideas
+    url: https://github.com/glaucia86/knowhub/discussions
+    about: For general questions, ideas, or anything that doesn't fit a bug report or feature request, use GitHub Discussions.

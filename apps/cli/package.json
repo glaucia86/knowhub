@@ -1,6 +1,7 @@
 {
   "name": "@knowhub/cli",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "bin": {
     "knowhub": "dist/index.js"
