@@ -29,6 +29,12 @@ export class DevEnvironmentController {
     @Body()
     payload: BootstrapRequest,
   ): { runId: string; status: 'accepted' | 'running'; estimatedCompletionSeconds: number } {
+    if (payload.pullModels) {
+      throw new BadRequestException(
+        "pullModels=true is not supported yet. Use 'docker compose exec ollama ollama pull <model>' manually.",
+      );
+    }
+
     if (payload.runMigrations) {
       bootstrapLocalDatabase();
     }
@@ -47,6 +53,11 @@ export class DevEnvironmentController {
   reset(@Body() payload: ResetRequest): { runId: string; status: 'accepted' | 'running' } {
     if (!payload.confirm) {
       throw new BadRequestException('Confirm field = true and required for reset.');
+    }
+    if (payload.includeInfrastructureVolumes) {
+      throw new BadRequestException(
+        "includeInfrastructureVolumes=true is not supported by this endpoint yet. Use 'docker compose down -v' manually.",
+      );
     }
 
     resetLocalDatabase({ includeSeed: true });

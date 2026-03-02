@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { getDatabaseClient } from './database.client';
 import {
@@ -108,7 +107,7 @@ export function runDevelopmentSeed(): SeedSummary {
 
   db.insert(contentChunks)
     .values({
-      id: randomUUID(),
+      id: 'chunk-note-1-0',
       entryId: 'entry-note-1',
       chunkIndex: 0,
       content: 'Local flow with env setup, compose up, and database bootstrap.',

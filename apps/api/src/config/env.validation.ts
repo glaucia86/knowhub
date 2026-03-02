@@ -1,7 +1,11 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { config as loadDotenv } from 'dotenv';
-import { type EnvironmentWorkspace, listEnvironmentVariables } from './env.catalog';
+import {
+  type EnvironmentVariableSpec,
+  type EnvironmentWorkspace,
+  listEnvironmentVariables,
+} from './env.catalog';
 
 export interface EnvironmentValidationResult {
   status: 'pass' | 'fail';
@@ -35,6 +39,17 @@ function isInvalidBoolean(value: string): boolean {
   return value !== 'true' && value !== 'false';
 }
 
+function resolveEffectiveValue(
+  spec: EnvironmentVariableSpec,
+  values: Record<string, string | undefined>,
+): string | undefined {
+  const rawValue = values[spec.name];
+  if (rawValue && rawValue.trim().length > 0) {
+    return rawValue;
+  }
+  return spec.defaultValue;
+}
+
 export function validateEnvironmentValues(
   workspace: EnvironmentWorkspace,
   values: Record<string, string | undefined>,
@@ -44,7 +59,7 @@ export function validateEnvironmentValues(
   const invalidValues: string[] = [];
 
   for (const spec of specs) {
-    const value = values[spec.name];
+    const value = resolveEffectiveValue(spec, values);
     if (spec.required && (!value || value.trim().length === 0)) {
       missingRequired.push(spec.name);
       continue;
@@ -59,8 +74,13 @@ export function validateEnvironmentValues(
     }
   }
 
+  const externalAiEnabledSpec = specs.find((spec) => spec.name === 'ENABLE_EXTERNAL_AI');
+  const externalAiEnabled = externalAiEnabledSpec
+    ? resolveEffectiveValue(externalAiEnabledSpec, values) === 'true'
+    : values.ENABLE_EXTERNAL_AI === 'true';
+
   if (
-    values.ENABLE_EXTERNAL_AI === 'true' &&
+    externalAiEnabled &&
     (!values.EXTERNAL_AI_API_KEY || values.EXTERNAL_AI_API_KEY.trim() === '')
   ) {
     missingRequired.push('EXTERNAL_AI_API_KEY');

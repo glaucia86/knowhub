@@ -162,6 +162,34 @@ npm run db:reset
 
 The reset command removes `apps/api/local.db`, reapplies migrations and runs deterministic seed data.
 
+### Storage maintenance (Docker + Ollama)
+
+To prevent disk growth over time, use the maintenance script:
+
+```bash
+bash scripts/storage-maintenance.sh
+```
+
+The default mode is `dry-run` (no deletion), it only shows what would be removed.
+
+Apply cleanup:
+
+```bash
+bash scripts/storage-maintenance.sh --apply
+```
+
+Keep a custom model list:
+
+```bash
+bash scripts/storage-maintenance.sh --apply --keep "nomic-embed-text:latest,qwen2.5:3b"
+```
+
+What this script does:
+
+- Removes Ollama models that are not in the keep list
+- Runs Docker cleanup for unused containers/images/volumes/build cache
+- Shows `docker system df` before and after
+
 ### Environment validation and external fallback
 
 Required API variables are validated on startup. If a required key is missing, API startup fails with an actionable message.
@@ -195,15 +223,16 @@ Quando isso acontecer:
 
 ## Commands
 
-| Goal                | Command             |
-| ------------------- | ------------------- |
-| Build core          | `npm run build`     |
-| Build web only      | `npm run build:web` |
-| Build all           | `npm run build:all` |
-| Dev core            | `npm run dev`       |
-| Dev web             | `npm run dev:web`   |
-| Dev all             | `npm run dev:all`   |
-| Lint all workspaces | `npm run lint`      |
+| Goal                | Command                               |
+| ------------------- | ------------------------------------- |
+| Build core          | `npm run build`                       |
+| Build web only      | `npm run build:web`                   |
+| Build all           | `npm run build:all`                   |
+| Dev core            | `npm run dev`                         |
+| Dev web             | `npm run dev:web`                     |
+| Dev all             | `npm run dev:all`                     |
+| Lint all workspaces | `npm run lint`                        |
+| Storage maintenance | `bash scripts/storage-maintenance.sh` |
 
 CLI quick check:
 

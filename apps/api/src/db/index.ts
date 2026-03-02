@@ -10,5 +10,20 @@ function resolveApiWorkspaceRoot(): string {
 }
 
 export const API_WORKSPACE_ROOT = resolveApiWorkspaceRoot();
-export const LOCAL_DATABASE_PATH = path.resolve(API_WORKSPACE_ROOT, 'local.db');
+
+function resolveDatabasePathFromEnv(databaseUrl: string | undefined): string {
+  if (!databaseUrl || databaseUrl.trim().length === 0) {
+    return path.resolve(API_WORKSPACE_ROOT, 'local.db');
+  }
+
+  const normalized = databaseUrl.trim();
+  const withoutFilePrefix = normalized.startsWith('file:') ? normalized.slice(5) : normalized;
+  if (path.isAbsolute(withoutFilePrefix)) {
+    return withoutFilePrefix;
+  }
+
+  return path.resolve(API_WORKSPACE_ROOT, withoutFilePrefix);
+}
+
+export const LOCAL_DATABASE_PATH = resolveDatabasePathFromEnv(process.env.DATABASE_URL);
 export const LOCAL_MIGRATIONS_PATH = path.resolve(API_WORKSPACE_ROOT, 'src', 'db', 'migrations');

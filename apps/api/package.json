@@ -15,7 +15,6 @@
   "dependencies": {
     "@knowhub/shared-types": "0.1.0",
     "@knowhub/shared-utils": "0.1.0",
-    "@nestjs/config": "^4.0.2",
     "@nestjs/common": "^11.1.14",
     "@nestjs/core": "^11.1.14",
     "@nestjs/platform-express": "^11.1.14",
@@ -27,7 +26,6 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "drizzle-kit": "^0.31.5",
-    "tsx": "^4.20.6"
+    "drizzle-kit": "^0.31.5"
   }
 }

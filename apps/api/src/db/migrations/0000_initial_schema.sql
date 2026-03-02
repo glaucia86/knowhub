@@ -19,7 +19,6 @@ CREATE TABLE `user_settings` (
   `telegram_token` text,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
-CREATE UNIQUE INDEX `user_settings_user_id_unique` ON `user_settings` (`user_id`);
 CREATE UNIQUE INDEX `ux_user_settings_user` ON `user_settings` (`user_id`);
 
 CREATE TABLE `knowledge_entries` (

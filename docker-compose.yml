@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.17.4
     container_name: knowhub-ollama
     ports:
       - '11434:11434'

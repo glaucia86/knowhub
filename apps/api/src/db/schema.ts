@@ -23,8 +23,7 @@ export const userSettings = sqliteTable(
     id: text('id').primaryKey(),
     userId: text('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' })
-      .unique(),
+      .references(() => users.id, { onDelete: 'cascade' }),
     aiProvider: text('ai_provider').notNull(),
     aiModel: text('ai_model').notNull(),
     embeddingModel: text('embedding_model').notNull(),

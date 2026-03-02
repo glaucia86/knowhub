@@ -35,11 +35,6 @@ function ensureMigrationsMeta(): string {
   return journalPath;
 }
 
-function readMigrationJournal(): MigrationJournal {
-  const journalPath = ensureMigrationsMeta();
-  return JSON.parse(readFileSync(journalPath, 'utf8')) as MigrationJournal;
-}
-
 function listSqlMigrations(): string[] {
   if (!existsSync(LOCAL_MIGRATIONS_PATH)) {
     return [];
@@ -51,9 +46,8 @@ function listSqlMigrations(): string[] {
     .sort((a, b) => a.localeCompare(b));
 }
 
-function applyPendingMigrations(): { applied: number; skipped: number } {
+function ensureMigrationTrackingTable(): void {
   const client = getDatabaseClient();
-
   client.sqlite.exec(`
     CREATE TABLE IF NOT EXISTS __kh_migrations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,11 +55,22 @@ function applyPendingMigrations(): { applied: number; skipped: number } {
       applied_at INTEGER NOT NULL
     );
   `);
+}
 
-  const appliedRows = client.sqlite.prepare('SELECT name FROM __kh_migrations').all() as Array<{
+function getAppliedMigrationNames(): string[] {
+  const client = getDatabaseClient();
+  const rows = client.sqlite
+    .prepare('SELECT name FROM __kh_migrations ORDER BY name ASC')
+    .all() as Array<{
     name: string;
   }>;
-  const appliedSet = new Set(appliedRows.map((row) => row.name));
+  return rows.map((row) => row.name);
+}
+
+function applyPendingMigrations(): { applied: number; skipped: number } {
+  const client = getDatabaseClient();
+  ensureMigrationTrackingTable();
+  const appliedSet = new Set(getAppliedMigrationNames());
   const files = listSqlMigrations();
 
   let applied = 0;
@@ -105,12 +110,20 @@ export function bootstrapLocalDatabase(): { currentVersion: string; pendingMigra
 }
 
 export function getSchemaVersionInfo(): { currentVersion: string; pendingMigrations: number } {
-  const journal = readMigrationJournal();
+  ensureMigrationsMeta();
+  ensureMigrationTrackingTable();
+
+  const files = listSqlMigrations();
+  const appliedSet = new Set(getAppliedMigrationNames());
+  const appliedFiles = files.filter((filename) => appliedSet.has(filename));
+  const pendingMigrations = files.filter((filename) => !appliedSet.has(filename)).length;
+
   const currentVersion =
-    journal.entries.length > 0 ? journal.entries[journal.entries.length - 1].tag : '0';
+    appliedFiles.length > 0 ? appliedFiles[appliedFiles.length - 1].replace(/\.sql$/, '') : '0';
+
   return {
     currentVersion,
-    pendingMigrations: 0,
+    pendingMigrations,
   };
 }
 
