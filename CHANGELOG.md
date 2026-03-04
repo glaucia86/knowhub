@@ -2,6 +2,27 @@
 
 Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
+## [v0.4.0] - 2026-03-04
+
+### Added
+
+- EPIC-1.1: `setup` local-first com geracao de identidade, persistencia segura de segredos e bootstrap de configuracao.
+- Modulos `Auth`, `Health` e `Settings` na API com rotas `/api/v1/auth/*`, `/api/v1/health` e `/api/v1/settings*`.
+- Contratos compartilhados de auth/health/settings em `packages/shared-types`.
+- Migration para `refresh_tokens` (rotacao/revogacao stateful) e campo `embedding_model`.
+
+### Changed
+
+- Endurecimento de seguranca em auth: comparacao timing-safe de credenciais, latencia estabilizada em falhas e rate limiting local.
+- Healthcheck alinhado ao contrato do PRD com status agregado, `version`, `uptime` e degradacao explicita para dependencia opcional.
+- Settings com suporte a warning de compatibilidade de embeddings e listagem de modelos com cache TTL.
+- Setup CLI com aplicacao programatica de migrations, feedback visual (`ora`) e geracao de `ecosystem.config.js` para PM2.
+
+### Fixed
+
+- Correcao de fluxo de refresh token e revogacao no ciclo de autenticacao.
+- Correcao de bootstrap idempotente de usuario/settings no setup.
+
 ## [v0.3.0] - 2026-03-02
 
 ### Added

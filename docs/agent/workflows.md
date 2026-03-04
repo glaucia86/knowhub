@@ -74,5 +74,5 @@ When this happens:
 
 ## CLI Checks
 
-- Build CLI: `npm run build -w @knowhub/cli`
+- Build CLI: `npm run build -w knowhub-ai`
 - Run CLI check: `node apps/cli/dist/index.js setup-check`

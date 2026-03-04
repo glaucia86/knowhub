@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { runSetupCheck } from './commands/setup-check';
+import { registerSetupCommand } from './commands/setup/setup.command';
 
 const program = new Command();
 
@@ -12,5 +13,7 @@ program
     const result = runSetupCheck(process.version);
     process.stdout.write(`${result}\n`);
   });
+
+registerSetupCommand(program);
 
 void program.parseAsync(process.argv);

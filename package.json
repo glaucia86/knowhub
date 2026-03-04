@@ -29,6 +29,7 @@
     "db:seed": "npm run db:seed -w @knowhub/api",
     "db:reset": "npm run db:reset -w @knowhub/api",
     "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage --filter=@knowhub/api",
     "test:watch": "turbo run test:watch",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

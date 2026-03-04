@@ -1,3 +1,6 @@
 export * from './contributor-environment.types';
 export * from './shared-asset.types';
 export * from './quality-gate.types';
+export * from './auth.types';
+export * from './health.types';
+export * from './settings.types';

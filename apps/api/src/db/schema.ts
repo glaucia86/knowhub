@@ -30,7 +30,6 @@ export const userSettings = sqliteTable(
     privacyMode: integer('privacy_mode', { mode: 'boolean' }).notNull().default(true),
     language: text('language').notNull().default('pt-BR'),
     telegramEnabled: integer('telegram_enabled', { mode: 'boolean' }).notNull().default(false),
-    telegramToken: text('telegram_token'),
   },
   (table) => [uniqueIndex('ux_user_settings_user').on(table.userId)],
 );
@@ -73,8 +72,28 @@ export const contentChunks = sqliteTable(
     content: text('content').notNull(),
     tokenCount: integer('token_count').notNull(),
     embedding: text('embedding'),
+    embeddingModel: text('embedding_model'),
   },
   (table) => [uniqueIndex('ux_content_chunk_entry_idx').on(table.entryId, table.chunkIndex)],
+);
+
+export const refreshTokens = sqliteTable(
+  'refresh_tokens',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    clientId: text('client_id').notNull(),
+    tokenHash: text('token_hash').notNull(),
+    issuedAt: integer('issued_at', { mode: 'timestamp_ms' }).notNull(),
+    expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+    revokedAt: integer('revoked_at', { mode: 'timestamp_ms' }),
+    replacedByTokenId: text('replaced_by_token_id'),
+    revokeReason: text('revoke_reason'),
+    ...timestampColumns,
+  },
+  (table) => [uniqueIndex('ux_refresh_tokens_hash').on(table.tokenHash)],
 );
 
 export const tags = sqliteTable(

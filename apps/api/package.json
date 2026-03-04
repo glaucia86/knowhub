@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "node dist/main.js",
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"no tests\"",
+    "test": "npm run build && node dist/modules/auth/auth.token.int.spec.js && node dist/modules/auth/auth.refresh.int.spec.js && node dist/modules/auth/auth.logout.int.spec.js && node dist/modules/auth/auth.service.int.spec.js && node dist/modules/auth/refresh-token.repository.int.spec.js && node dist/modules/auth/auth-audit.int.spec.js && node dist/modules/health/health.int.spec.js && node dist/modules/health/drizzle-health.int.spec.js && node dist/modules/settings/settings.int.spec.js && node dist/modules/settings/settings-ai.int.spec.js && node dist/modules/settings/settings.service.int.spec.js && node dist/modules/settings/settings.provider.int.spec.js && node dist/modules/settings/ollama-models.int.spec.js",
+    "test:coverage:auth": "npm run build && node --test --test-isolation=none --experimental-test-coverage --test-coverage-include=dist/modules/auth/auth.service.js --test-coverage-include=dist/modules/auth/refresh-token.repository.js --test-coverage-include=dist/modules/auth/auth-rate-limit.service.js --test-coverage-exclude=dist/modules/auth/*.spec.js --test-coverage-lines=90 --test-coverage-branches=90 --test-coverage-functions=90 dist/modules/auth/auth.token.int.spec.js dist/modules/auth/auth.refresh.int.spec.js dist/modules/auth/auth.logout.int.spec.js dist/modules/auth/auth.service.int.spec.js dist/modules/auth/refresh-token.repository.int.spec.js dist/modules/auth/auth-audit.int.spec.js",
+    "test:coverage:health": "npm run build && node --test --test-isolation=none --experimental-test-coverage --test-coverage-include=dist/modules/health/ollama-health.indicator.js --test-coverage-include=dist/modules/health/drizzle-health.indicator.js --test-coverage-exclude=dist/modules/health/*.spec.js --test-coverage-lines=85 --test-coverage-branches=85 --test-coverage-functions=85 dist/modules/health/health.int.spec.js dist/modules/health/drizzle-health.int.spec.js",
+    "test:coverage:settings": "npm run build && node --test --test-isolation=none --experimental-test-coverage --test-coverage-include=dist/modules/settings/settings.service.js --test-coverage-include=dist/modules/settings/ai-provider.factory.js --test-coverage-include=dist/modules/settings/ollama-models.service.js --test-coverage-exclude=dist/modules/settings/*.spec.js --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 dist/modules/settings/settings.int.spec.js dist/modules/settings/settings-ai.int.spec.js dist/modules/settings/settings.service.int.spec.js dist/modules/settings/settings.provider.int.spec.js dist/modules/settings/ollama-models.int.spec.js",
+    "test:coverage": "npm run test:coverage:auth && npm run test:coverage:health && npm run test:coverage:settings",
+    "test:watch": "npm run test",
     "lint": "eslint src --ext .ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node ../../scripts/db-migrate.js",
@@ -18,15 +23,30 @@
     "@knowhub/shared-utils": "0.1.0",
     "@nestjs/common": "^11.1.14",
     "@nestjs/core": "^11.1.14",
-    "@nestjs/platform-express": "^11.1.14",
+    "@nestjs/jwt": "^11.0.1",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.1.15",
+    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/terminus": "^11.0.0",
+    "@nestjs/throttler": "^6.4.0",
+    "axios": "^1.13.2",
     "better-sqlite3": "^12.4.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.5",
     "joi": "^18.0.1",
-    "reflect-metadata": "^0.2.0"
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.0",
+    "zod": "^3.25.76"
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/passport-jwt": "^4.0.1",
     "drizzle-kit": "^0.31.5"
   }
 }
