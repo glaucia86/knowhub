@@ -45,7 +45,12 @@ export class DevEnvironmentService {
           endpoint: 'http://localhost:11434',
           lastCheckedAt: now,
         },
-        { name: 'database', health: 'healthy', endpoint: './local.db', lastCheckedAt: now },
+        {
+          name: 'database',
+          health: 'healthy',
+          endpoint: process.env.DATABASE_URL || 'file:~/.knowhub/data/knowhub.db',
+          lastCheckedAt: now,
+        },
         { name: 'api', health: 'healthy', endpoint: 'http://localhost:3001', lastCheckedAt: now },
         { name: 'web', health: 'starting', endpoint: 'http://localhost:3000', lastCheckedAt: now },
       ],

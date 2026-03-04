@@ -35,8 +35,8 @@ export const ENVIRONMENT_VARIABLE_CATALOG: EnvironmentVariableSpec[] = [
     required: true,
     sensitive: false,
     description: 'Local SQLite database location.',
-    exampleValue: './local.db',
-    defaultValue: './local.db',
+    exampleValue: 'file:~/.knowhub/data/knowhub.db',
+    defaultValue: 'file:~/.knowhub/data/knowhub.db',
   },
   {
     name: 'REDIS_URL',
