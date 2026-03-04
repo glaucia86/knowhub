@@ -2,6 +2,25 @@
 
 Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
+## [v0.4.1] - 2026-03-04
+
+### Fixed
+
+- Auth: rotacao de refresh token sem lookup redundante, usando `refreshId` persistido para encadear `replacedByTokenId`.
+- Auth: inicializacao lazy do DB em `AuthService` para evitar falhas no construtor durante testes/CI.
+- Credential Store: carregamento lazy de `keytar` para evitar promise rejeitada no startup quando dependencia opcional estiver ausente.
+- Health: endpoint `/api/v1/health` com resposta consistente do contrato customizado (`ok`/`degraded` com `200`, `error` com `503`) sem interceptacao do Terminus.
+- API DB client: criacao automatica do diretorio pai do SQLite antes de abrir o arquivo (`better-sqlite3`), corrigindo falhas em CI.
+- CLI setup: tratamento de erro com `spinner.fail(...)` no bloco de armazenamento de segredos.
+- CLI setup: `ecosystem.config.js` passa `DATABASE_URL` explicitamente para alinhar API ao banco provisionado no setup.
+- CLI setup: mensagens finais com `Web URL` e `API URL` explicitas, incluindo nota de seguranca sobre `clientId` vs `clientSecret`.
+- Auth rate-limit config: remocao de export morto `TOKEN_RATE_LIMIT_KEY`.
+
+### Changed
+
+- CI: pin de Node.js para `20` (LTS) nos jobs `lint`, `build` e `test` para maior estabilidade no pipeline.
+- API env/docs: default de `DATABASE_URL` alinhado ao banco local do usuario (`file:~/.knowhub/data/knowhub.db`).
+
 ## [v0.4.0] - 2026-03-04
 
 ### Added
