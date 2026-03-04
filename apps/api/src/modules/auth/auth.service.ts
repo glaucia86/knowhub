@@ -18,10 +18,18 @@ interface PersistedTokenPair {
   refreshId: string;
 }
 
+interface UserLookupDatabase {
+  select: (fields: { id: unknown }) => {
+    from: (table: unknown) => {
+      limit: (count: number) => Promise<Array<{ id: string }>>;
+    };
+  };
+}
+
 /* c8 ignore next */
 @Injectable()
 export class AuthService {
-  private readonly db = getDatabaseClient().db;
+  private db: UserLookupDatabase | null = null;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -30,8 +38,15 @@ export class AuthService {
     private readonly authAuditService: AuthAuditService,
   ) {}
 
+  private getDb(): UserLookupDatabase {
+    if (!this.db) {
+      this.db = getDatabaseClient().db as unknown as UserLookupDatabase;
+    }
+    return this.db;
+  }
+
   private async resolveDefaultUserId(): Promise<string> {
-    const rows = await this.db.select({ id: users.id }).from(users).limit(1);
+    const rows = await this.getDb().select({ id: users.id }).from(users).limit(1);
     if (rows.length === 0) {
       throw new UnauthorizedException('No local user provisioned. Run setup first.');
     }
