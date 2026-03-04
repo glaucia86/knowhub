@@ -27,6 +27,6 @@ KnowHub — TypeScript monorepo. Package manager: **npm** (workspaces from root)
 
 Read only when the task requires it:
 
-- Build/dev issues, CI/CD, or Windows + OneDrive errors → `docs/agent/workflows.md`
-- TypeScript conventions, ESLint/Prettier config, or commit format → `docs/agent/code-style.md`
-- Changes spanning multiple workspaces or touching shared packages → `docs/agent/architecture.md`
+- Build/dev issues, CI/CD, or Windows + OneDrive errors → [docs/agent/workflows.md](docs/agent/workflows.md)
+- TypeScript conventions, ESLint/Prettier config, or commit format → [docs/agent/code-style.md](docs/agent/code-style.md)
+- Changes spanning multiple workspaces or touching shared packages → [docs/agent/architecture.md](docs/agent/architecture.md)

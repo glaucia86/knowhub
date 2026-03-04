@@ -74,7 +74,16 @@ docker compose up -d
 make ollama-pull
 # ou: docker compose exec ollama ollama pull gemma3:4b
 
-# 6. Inicie os servidores de desenvolvimento
+# 6. Faça o build dos pacotes core
+npm run build
+
+# 7. Execute o setup em comando único (EPIC-1.1)
+# fluxo do pacote publicado:
+# npx knowhub-ai setup
+# fluxo local no monorepo:
+node apps/cli/dist/index.js setup --reset
+
+# 8. Inicie os servidores de desenvolvimento
 npm run dev
 ```
 
@@ -89,6 +98,9 @@ Acesse a aplicação em:
 >
 > **Windows + OneDrive:** `apps/web` pode falhar com `spawn EPERM`. Execute
 > `npm run dev` para os serviços principais e `npm run dev:web` separadamente.
+>
+> **Windows + testes locais de auth na API:** se necessário, suba a API com DB explícito:
+> `DATABASE_URL=file:C:/Users/<usuario>/.knowhub/data/knowhub.db`
 
 ### Configuração do banco de dados
 
@@ -102,6 +114,9 @@ Reset completo (remove `apps/api/local.db`, re-executa migrations e seed):
 ```bash
 npm run db:reset
 ```
+
+Nota: o comando de setup da CLI provisiona o banco local do usuário em
+`~/.knowhub/data/knowhub.db`. Os scripts `db:*` acima atendem o fluxo de banco do workspace/dev.
 
 ---
 

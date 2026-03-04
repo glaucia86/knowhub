@@ -8,6 +8,20 @@
       "when": 1761955200000,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "0001",
+      "when": 1772582400000,
+      "tag": "0001_epic_1_1_auth_setup",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "0002",
+      "when": 1772586000000,
+      "tag": "0002_drop_telegram_token",
+      "breakpoints": true
     }
   ]
 }

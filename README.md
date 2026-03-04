@@ -109,7 +109,16 @@ docker compose up -d
 make ollama-pull
 # or: docker compose exec ollama ollama pull gemma3:4b
 
-# 6. Start development servers
+# 6. Build core packages
+npm run build
+
+# 7. Run one-command local setup (EPIC-1.1)
+# published package flow:
+# npx knowhub-ai setup
+# monorepo local flow:
+node apps/cli/dist/index.js setup --reset
+
+# 8. Start development servers
 npm run dev
 ```
 
@@ -124,6 +133,9 @@ Access the app at:
 >
 > **Windows + OneDrive:** `apps/web` may fail with `spawn EPERM`. Run
 > `npm run dev` for the core services and `npm run dev:web` separately.
+>
+> **Windows + local API auth tests:** if needed, start API with explicit DB:
+> `DATABASE_URL=file:C:/Users/<user>/.knowhub/data/knowhub.db`
 
 ### Database setup
 
@@ -137,6 +149,9 @@ Full reset (removes `apps/api/local.db`, re-runs migrations and seed):
 ```bash
 npm run db:reset
 ```
+
+Note: the CLI setup command provisions the user-facing local database at
+`~/.knowhub/data/knowhub.db`. The `db:*` scripts above are for workspace/dev DB workflows.
 
 ---
 
