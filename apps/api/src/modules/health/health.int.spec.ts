@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { HealthController } from './health.controller';
 import { OllamaHealthIndicator } from './ollama-health.indicator';
 
 describe('OllamaHealthIndicator', () => {
@@ -54,5 +55,62 @@ describe('OllamaHealthIndicator', () => {
     } finally {
       (globalThis as { fetch?: unknown }).fetch = originalFetch;
     }
+  });
+});
+
+describe('HealthController', () => {
+  it('returns degraded with HTTP 200 when database is connected and Ollama is unavailable', async () => {
+    const drizzleHealthIndicator = {
+      check: async () => ({ status: 'connected', latencyMs: 4 }),
+    };
+    const ollamaHealthIndicator = {
+      check: async () => ({ status: 'unavailable', latencyMs: 10 }),
+    };
+
+    let responseStatusCode: number | null = null;
+    const response = {
+      status: (code: number) => {
+        responseStatusCode = code;
+      },
+    };
+
+    const controller = new HealthController(
+      drizzleHealthIndicator as never,
+      ollamaHealthIndicator as never,
+    );
+
+    const result = await controller.getHealth(response);
+
+    assert.equal(result.status, 'degraded');
+    assert.equal(result.database.status, 'connected');
+    assert.equal(result.ollama.status, 'unavailable');
+    assert.equal(responseStatusCode, null);
+  });
+
+  it('returns error with HTTP 503 when database is down', async () => {
+    const drizzleHealthIndicator = {
+      check: async () => ({ status: 'error', error: 'db down' }),
+    };
+    const ollamaHealthIndicator = {
+      check: async () => ({ status: 'unavailable', latencyMs: 10 }),
+    };
+
+    let responseStatusCode: number | null = null;
+    const response = {
+      status: (code: number) => {
+        responseStatusCode = code;
+      },
+    };
+
+    const controller = new HealthController(
+      drizzleHealthIndicator as never,
+      ollamaHealthIndicator as never,
+    );
+
+    const result = await controller.getHealth(response);
+
+    assert.equal(result.status, 'error');
+    assert.equal(result.database.status, 'error');
+    assert.equal(responseStatusCode, 503);
   });
 });

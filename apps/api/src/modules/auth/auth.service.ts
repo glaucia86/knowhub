@@ -13,6 +13,11 @@ interface AuthenticatedPrincipal {
   clientId: string;
 }
 
+interface PersistedTokenPair {
+  tokenPair: TokenPairResponse;
+  refreshId: string;
+}
+
 /* c8 ignore next */
 @Injectable()
 export class AuthService {
@@ -50,7 +55,7 @@ export class AuthService {
       throw new UnauthorizedException('Signing key unavailable. Run setup again.');
     }
 
-    const tokenPair = await this.generateAndPersistTokenPair({ userId, clientId }, privateKey);
+    const { tokenPair } = await this.generateAndPersistTokenPair({ userId, clientId }, privateKey);
     await this.authAuditService.record('token_issued', userId, clientId);
     return tokenPair;
   }
@@ -63,7 +68,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token.');
     }
 
-    const tokenPair = await this.generateAndPersistTokenPair(
+    const { tokenPair, refreshId } = await this.generateAndPersistTokenPair(
       {
         userId: existing.userId,
         clientId: existing.clientId,
@@ -71,9 +76,7 @@ export class AuthService {
       await this.resolvePrivateKey(existing.clientId),
     );
 
-    const nextTokenHash = RefreshTokenRepository.hashToken(tokenPair.refreshToken);
-    const next = await this.refreshTokenRepository.findActiveByTokenHash(nextTokenHash);
-    await this.refreshTokenRepository.revoke(existing.id, 'rotated', next?.id);
+    await this.refreshTokenRepository.revoke(existing.id, 'rotated', refreshId);
     await this.authAuditService.record('token_refresh', existing.userId, existing.clientId);
 
     return tokenPair;
@@ -92,7 +95,7 @@ export class AuthService {
   private async generateAndPersistTokenPair(
     principal: AuthenticatedPrincipal,
     privateKey: string,
-  ): Promise<TokenPairResponse> {
+  ): Promise<PersistedTokenPair> {
     const now = new Date();
     const accessExpiresAt = new Date(now.getTime() + 15 * 60 * 1000);
     const refreshExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -123,11 +126,14 @@ export class AuthService {
     });
 
     return {
-      accessToken,
-      expiresAt: accessExpiresAt.toISOString(),
-      refreshToken,
-      refreshExpiresAt: refreshExpiresAt.toISOString(),
-      tokenType: 'Bearer',
+      refreshId,
+      tokenPair: {
+        accessToken,
+        expiresAt: accessExpiresAt.toISOString(),
+        refreshToken,
+        refreshExpiresAt: refreshExpiresAt.toISOString(),
+        tokenType: 'Bearer',
+      },
     };
   }
 

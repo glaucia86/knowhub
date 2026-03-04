@@ -101,48 +101,58 @@ export function registerSetupCommand(program: Command): void {
 
       const setupSpinner = ora('Gerando identidade e segredos locais...').start();
       const crypto = cryptoService.generate();
-      await credentialStoreService.storeClientSecret(crypto.clientId, crypto.clientSecret);
-      await credentialStoreService.storePrivateKey(crypto.clientId, crypto.privateKeyPem);
-      const writeResult = configWriter.writeConfig(crypto.clientId, crypto.publicKeyPem);
-      setupSpinner.succeed('Segredos armazenados no OS Credential Store com sucesso.');
+      let writeResult: ReturnType<SetupConfigWriterService['writeConfig']>;
+      try {
+        await credentialStoreService.storeClientSecret(crypto.clientId, crypto.clientSecret);
+        await credentialStoreService.storePrivateKey(crypto.clientId, crypto.privateKeyPem);
+        writeResult = configWriter.writeConfig(crypto.clientId, crypto.publicKeyPem);
+        setupSpinner.succeed('Secrets successfully stored in the OS Credential Store.');
+      } catch (error) {
+        setupSpinner.fail('Failed to store secrets in the OS Credential Store.');
+        throw error;
+      }
 
       const dbPath = path.resolve(writeResult.dataDir, 'knowhub.db');
       if (shouldResetStorage) {
-        const cleanupSpinner = ora('Limpando banco local anterior...').start();
+        const cleanupSpinner = ora('Cleaning up previous local database...').start();
         const filesToRemove = [`${dbPath}`, `${dbPath}-wal`, `${dbPath}-shm`];
         for (const filePath of filesToRemove) {
           if (existsSync(filePath)) {
             rmSync(filePath, { force: true });
           }
         }
-        cleanupSpinner.succeed('Banco local anterior removido.');
+        cleanupSpinner.succeed('Previous local database removed.');
       }
 
-      const migrationSpinner = ora('Aplicando migrations do banco local...').start();
+      const migrationSpinner = ora('Applying local database migrations...').start();
       migrationService.run(dbPath);
-      migrationSpinner.succeed('Migrations aplicadas com sucesso.');
+      migrationSpinner.succeed('Local database migrations applied successfully.');
 
-      const seedSpinner = ora('Provisionando usuario padrao...').start();
+      const seedSpinner = ora('Provisioning default user...').start();
       bootstrapService.bootstrap(dbPath, userName);
-      seedSpinner.succeed('Usuario padrao provisionado.');
+      seedSpinner.succeed('Default user provisioned.');
 
-      const ollamaSpinner = ora('Detectando Ollama...').start();
+      const ollamaSpinner = ora('Detecting Ollama...').start();
       const ollama = await ollamaCheckService.check();
       if (ollama.available) {
         ollamaSpinner.succeed(ollama.message);
       } else {
-        ollamaSpinner.warn(`${ollama.message} Instale em https://ollama.ai/download`);
+        ollamaSpinner.warn(`${ollama.message} Install at https://ollama.ai/download`);
       }
 
-      const ecosystemPath = ecosystemService.write(process.cwd());
+      const ecosystemPath = ecosystemService.write(process.cwd(), dbPath);
 
-      process.stdout.write('Setup concluido com sucesso.\n');
-      process.stdout.write(`URL: http://localhost:3000\n`);
+      process.stdout.write('Setup completed successfully.\n');
+      process.stdout.write('Web URL: http://localhost:3000\n');
+      process.stdout.write('API URL: http://localhost:3001\n');
       process.stdout.write(`clientId: ${crypto.clientId}\n`);
+      process.stdout.write(
+        'Security note: clientId is not a secret. clientSecret is stored in the OS Credential Store and is never printed.\n',
+      );
       process.stdout.write(`config: ${writeResult.configPath}\n`);
       process.stdout.write(`database: ${dbPath}\n`);
       process.stdout.write(`ecosystem: ${ecosystemPath}\n`);
-      process.stdout.write('Proximo passo: pm2 start ecosystem.config.js\n');
-      process.stdout.write('Depois execute npm run dev e npm run dev:web.\n');
+      process.stdout.write('Next step: pm2 start ecosystem.config.js\n');
+      process.stdout.write('Then run npm run dev and npm run dev:web.\n');
     });
 }

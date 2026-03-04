@@ -2,8 +2,10 @@ import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 export class SetupEcosystemService {
-  write(baseDir: string): string {
+  write(baseDir: string, databasePath: string): string {
     const ecosystemPath = path.resolve(baseDir, 'ecosystem.config.js');
+    const databaseUrl = `file:${databasePath}`;
+    const databaseUrlLiteral = JSON.stringify(databaseUrl);
     const content = `module.exports = {
   healthCheckUrl: 'http://localhost:3001/api/v1/health',
   apps: [
@@ -15,7 +17,8 @@ export class SetupEcosystemService {
       max_restarts: 3,
       restart_delay: 1000,
       env: {
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
+        DATABASE_URL: ${databaseUrlLiteral}
       }
     },
     {

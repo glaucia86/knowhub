@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import { describe, it } from 'node:test';
 import { Command } from 'commander';
 import { registerSetupCommand } from './setup.command';
@@ -51,6 +52,7 @@ describe('setup command flow', () => {
 
     const output: string[] = [];
     let seededName = '';
+    let ecosystemDatabasePath = '';
 
     SetupConfigWriterService.prototype.isAlreadyConfigured = () => false;
     SetupConfigWriterService.prototype.writeConfig = () => ({
@@ -75,7 +77,10 @@ describe('setup command flow', () => {
       available: true,
       message: 'Ollama OK',
     });
-    SetupEcosystemService.prototype.write = () => 'C:/repo/ecosystem.config.js';
+    SetupEcosystemService.prototype.write = (_baseDir: string, databasePath: string) => {
+      ecosystemDatabasePath = databasePath;
+      return 'C:/repo/ecosystem.config.js';
+    };
     (process.stdout.write as unknown as (chunk: string) => boolean) = ((chunk: string) => {
       output.push(chunk);
       return true;
@@ -90,10 +95,12 @@ describe('setup command flow', () => {
 
       assert.equal(seededName, 'Ana');
       const fullOutput = output.join('');
-      assert.equal(fullOutput.includes('Setup concluido com sucesso.'), true);
-      assert.equal(fullOutput.includes('URL: http://localhost:3000'), true);
+      assert.equal(fullOutput.includes('Setup completed successfully.'), true);
+      assert.equal(fullOutput.includes('Web URL: http://localhost:3000'), true);
+      assert.equal(fullOutput.includes('API URL: http://localhost:3001'), true);
       assert.equal(fullOutput.includes('clientId: client-1'), true);
       assert.equal(fullOutput.includes('pm2 start ecosystem.config.js'), true);
+      assert.equal(ecosystemDatabasePath, path.resolve('C:/temp/.knowhub/data', 'knowhub.db'));
     } finally {
       SetupConfigWriterService.prototype.isAlreadyConfigured = originalIsConfigured;
       SetupConfigWriterService.prototype.writeConfig = originalWriteConfig;

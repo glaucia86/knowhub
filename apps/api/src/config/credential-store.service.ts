@@ -8,11 +8,14 @@ interface KeytarLike {
 
 @Injectable()
 export class CredentialStoreService {
-  private readonly keytarPromise: Promise<KeytarLike>;
+  private keytarPromise: Promise<KeytarLike> | null = null;
   private readonly keytarChunkSize = 1000;
 
-  constructor() {
-    this.keytarPromise = this.resolveKeytar();
+  private getKeytar(): Promise<KeytarLike> {
+    if (!this.keytarPromise) {
+      this.keytarPromise = this.resolveKeytar();
+    }
+    return this.keytarPromise;
   }
 
   private async resolveKeytar(): Promise<KeytarLike> {
@@ -28,7 +31,7 @@ export class CredentialStoreService {
   }
 
   async getSecret(service: string, account: string): Promise<string | null> {
-    const keytar = await this.keytarPromise;
+    const keytar = await this.getKeytar();
     if (service === 'knowhub-rsa') {
       return this.getChunkedSecret(keytar, account);
     }
@@ -36,7 +39,7 @@ export class CredentialStoreService {
   }
 
   async setSecret(service: string, account: string, secret: string): Promise<void> {
-    const keytar = await this.keytarPromise;
+    const keytar = await this.getKeytar();
     if (service === 'knowhub-rsa') {
       await this.setChunkedSecret(keytar, account, secret);
       return;
@@ -45,7 +48,7 @@ export class CredentialStoreService {
   }
 
   async deleteSecret(service: string, account: string): Promise<boolean> {
-    const keytar = await this.keytarPromise;
+    const keytar = await this.getKeytar();
     if (service === 'knowhub-rsa') {
       return this.deleteChunkedSecret(keytar, account);
     }

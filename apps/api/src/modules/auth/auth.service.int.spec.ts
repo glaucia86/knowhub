@@ -173,32 +173,56 @@ describe('AuthService', () => {
 
   it('should rotate refresh token on refresh flow', async () => {
     const revoked: Array<{ id: string; reason: string; replacedBy?: string }> = [];
-    let callCount = 0;
+    const created: Array<{ id: string }> = [];
+    const service = new AuthService(
+      { signAsync: async () => 'new-access-token' } as never,
+      { getSecret: async () => 'private-key-pem' } as never,
+      {
+        create: async (record: { id: string }) => {
+          created.push(record);
+        },
+        findActiveByTokenHash: async () => ({
+          id: 'old-refresh-id',
+          userId: 'user-1',
+          clientId: 'client-1',
+          tokenHash: 'hash',
+          issuedAt: new Date(),
+          expiresAt: new Date(Date.now() + 60_000),
+          revokedAt: null,
+          replacedByTokenId: null,
+          revokeReason: null,
+        }),
+        revoke: async (id: string, reason: string, replacedBy?: string) => {
+          revoked.push({ id, reason, replacedBy });
+        },
+      } as never,
+      { record: async () => undefined } as never,
+    );
+    setServiceDb(service, [{ id: 'u1' }]);
+
+    const pair = await service.refreshSession('valid-refresh');
+
+    assert.equal(pair.accessToken, 'new-access-token');
+    assert.equal(revoked.length, 1);
+    assert.equal(revoked[0]?.id, 'old-refresh-id');
+    assert.equal(revoked[0]?.reason, 'rotated');
+    assert.equal(revoked[0]?.replacedBy, created[0]?.id);
+  });
+
+  it('should not perform second refresh-token lookup during rotation', async () => {
+    let lookupCalls = 0;
     const service = new AuthService(
       { signAsync: async () => 'new-access-token' } as never,
       { getSecret: async () => 'private-key-pem' } as never,
       {
         create: async () => undefined,
         findActiveByTokenHash: async () => {
-          callCount += 1;
-          if (callCount === 1) {
-            return {
-              id: 'old-refresh-id',
-              userId: 'user-1',
-              clientId: 'client-1',
-              tokenHash: 'hash',
-              issuedAt: new Date(),
-              expiresAt: new Date(Date.now() + 60_000),
-              revokedAt: null,
-              replacedByTokenId: null,
-              revokeReason: null,
-            };
-          }
+          lookupCalls += 1;
           return {
-            id: 'new-refresh-id',
+            id: 'old-refresh-id',
             userId: 'user-1',
             clientId: 'client-1',
-            tokenHash: 'hash2',
+            tokenHash: 'hash',
             issuedAt: new Date(),
             expiresAt: new Date(Date.now() + 60_000),
             revokedAt: null,
@@ -206,63 +230,15 @@ describe('AuthService', () => {
             revokeReason: null,
           };
         },
-        revoke: async (id: string, reason: string, replacedBy?: string) => {
-          revoked.push({ id, reason, replacedBy });
-        },
+        revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
-    const pair = await service.refreshSession('valid-refresh');
+    await service.refreshSession('valid-refresh');
 
-    assert.equal(pair.accessToken, 'new-access-token');
-    assert.equal(revoked.length, 1);
-    assert.equal(revoked[0]?.id, 'old-refresh-id');
-    assert.equal(revoked[0]?.reason, 'rotated');
-    assert.equal(revoked[0]?.replacedBy, 'new-refresh-id');
-  });
-
-  it('should rotate refresh token even when replacement lookup is not found', async () => {
-    const revoked: Array<{ id: string; reason: string; replacedBy?: string }> = [];
-    let callCount = 0;
-    const service = new AuthService(
-      { signAsync: async () => 'new-access-token' } as never,
-      { getSecret: async () => 'private-key-pem' } as never,
-      {
-        create: async () => undefined,
-        findActiveByTokenHash: async () => {
-          callCount += 1;
-          if (callCount === 1) {
-            return {
-              id: 'old-refresh-id',
-              userId: 'user-1',
-              clientId: 'client-1',
-              tokenHash: 'hash',
-              issuedAt: new Date(),
-              expiresAt: new Date(Date.now() + 60_000),
-              revokedAt: null,
-              replacedByTokenId: null,
-              revokeReason: null,
-            };
-          }
-          return null;
-        },
-        revoke: async (id: string, reason: string, replacedBy?: string) => {
-          revoked.push({ id, reason, replacedBy });
-        },
-      } as never,
-      { record: async () => undefined } as never,
-    );
-    setServiceDb(service, [{ id: 'u1' }]);
-
-    const pair = await service.refreshSession('valid-refresh');
-
-    assert.equal(pair.accessToken, 'new-access-token');
-    assert.equal(revoked.length, 1);
-    assert.equal(revoked[0]?.id, 'old-refresh-id');
-    assert.equal(revoked[0]?.reason, 'rotated');
-    assert.equal(revoked[0]?.replacedBy, undefined);
+    assert.equal(lookupCalls, 1);
   });
 
   it('should reject refresh when private key is missing', async () => {
