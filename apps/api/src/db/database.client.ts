@@ -1,3 +1,5 @@
+import { mkdirSync } from 'node:fs';
+import path from 'node:path';
 import Database from 'better-sqlite3';
 import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
@@ -11,7 +13,13 @@ export interface LocalDatabaseClient {
 
 let cachedClient: LocalDatabaseClient | null = null;
 
+function ensureDatabaseDirectory(databasePath: string): void {
+  const databaseDirectory = path.dirname(databasePath);
+  mkdirSync(databaseDirectory, { recursive: true });
+}
+
 export function createDatabaseClient(databasePath = LOCAL_DATABASE_PATH): LocalDatabaseClient {
+  ensureDatabaseDirectory(databasePath);
   const sqlite = new Database(databasePath);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
