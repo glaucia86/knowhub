@@ -19,3 +19,14 @@
 
 - Core workspaces build reliably with `npm run build`.
 - Web workspace may require isolated execution in constrained Windows environments.
+
+## Current Product State
+
+- Release baseline: `v0.4.2`.
+- Delivered:
+  - EPIC-1.1: auth, setup, health, settings.
+  - EPIC-1.2: Knowledge Entry CRUD (types `NOTE`, `LINK`, `PDF`, `GITHUB`), tags, FTS, reindex flow.
+- When touching knowledge flows, keep these layers aligned:
+  1. DTO/service validation in `apps/api`.
+  2. Database schema and SQL migrations in `apps/api/src/db`.
+  3. shared contracts/utilities in `packages/shared-types` and `packages/shared-utils`.
