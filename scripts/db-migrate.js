@@ -69,12 +69,8 @@ for (const filename of migrationFiles) {
     continue;
   }
 
-  const tx = db.transaction(() => {
-    db.exec(sql);
-    db.prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)').run(filename, Date.now());
-  });
-
-  tx();
+  db.exec(sql);
+  db.prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)').run(filename, Date.now());
   appliedCount += 1;
   console.log(`[db:migrate] aplicado: ${filename}`);
 }

@@ -338,7 +338,7 @@ function HeroSection(): React.JSX.Element {
 
         <p className="max-w-lg text-lg leading-relaxed text-[var(--kh-muted)]">
           KnowHub is a local-first AI assistant that captures, indexes and retrieves your notes,
-          links and files — without sending a byte to the cloud.
+          links and files. Without sending a byte to the cloud.
         </p>
 
         {/* CTA row */}

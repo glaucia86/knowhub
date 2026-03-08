@@ -44,7 +44,13 @@ AI-generated summaries that never leave your device.
 
 ## Demo
 
-> 🚧 **Visual demos coming soon.** Here's a preview of the CLI experience:
+### Web UI
+
+<div align="center">
+  <img src="resources/home-page-v1.png" alt="KnowHub Landing Page" width="900"/>
+</div>
+
+### CLI Preview
 
 ```bash
 # Add a knowledge snippet
@@ -195,13 +201,38 @@ knowhub list --limit 10
 
 ---
 
+## API Reference
+
+Base URL: `http://localhost:3001/api/v1`
+
+### Knowledge Entries
+
+| Method   | Endpoint                      | Description                                                                    |
+| -------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `POST`   | `/knowledge`                  | Create an entry (`NOTE`, `LINK`, `PDF`, `GITHUB`)                              |
+| `GET`    | `/knowledge`                  | List entries — paginated, filterable by `type`, `status`, `tag`, full-text `q` |
+| `GET`    | `/knowledge/:entryId`         | Retrieve entry detail (chunk count, relation count)                            |
+| `PATCH`  | `/knowledge/:entryId`         | Update title, content, source URL, file path, or tags                          |
+| `DELETE` | `/knowledge/:entryId`         | Archive an entry (soft delete, recoverable)                                    |
+| `POST`   | `/knowledge/:entryId/reindex` | Request reindexing — accepts `INDEXED` / `FAILED` entries                      |
+
+Full Swagger docs: `http://localhost:3001/api`
+
+**Entry lifecycle:** `PENDING` → `INDEXING` → `INDEXED` · soft-archived via `DELETE` → `ARCHIVED` · reindexable via `POST /:id/reindex`
+
+---
+
 ## Roadmap
 
 - **Phase 0 — Infrastructure** ✅ Monorepo, CI/CD, local dev environment, open source governance
-- **Phase 1 — Core Features** 🚧 Knowledge ingestion, semantic search, AI Q&A via CLI
+- **Phase 1 — Core Features** 🚧
+  - ✅ Auth & local setup (CLI onboarding, JWT, secure credential store)
+  - ✅ Knowledge Entry CRUD (REST API · types: `NOTE` / `LINK` / `PDF` / `GITHUB` · status lifecycle · tags · FTS)
+  - ✅ Web landing page (Raycast/Linear design, responsive, animated)
+  - 📋 Semantic search and AI Q&A via CLI
 - **Phase 2 — Intelligence** 📋 Semantic connections, tagging, summarization
 - **Phase 3 — Integrations** 📋 Telegram bot, GitHub issues, PDF ingestion
-- **Phase 4 — Polish** 📋 Web UI, multi-user support, cloud sync (opt-in)
+- **Phase 4 — Polish** 📋 Full Web app, multi-user support, cloud sync (opt-in)
 
 ---
 

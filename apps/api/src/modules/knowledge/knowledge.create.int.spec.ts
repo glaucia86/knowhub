@@ -44,6 +44,24 @@ async function testRejectUnsafeFilePath(): Promise<void> {
   }
 }
 
+async function testCreatePdfWithFilePathOnly(): Promise<void> {
+  const context = await createKnowledgeTestContext();
+
+  try {
+    const response = await context.request.post('/api/v1/knowledge').send({
+      type: 'PDF',
+      filePath: 'docs/architecture.pdf',
+    });
+    const payload = response.body as KnowledgeEntryEnvelopeResponse;
+
+    assert.equal(response.status, 201);
+    assert.equal(payload.data.type, 'PDF');
+    assert.equal(payload.data.filePath, 'docs/architecture.pdf');
+  } finally {
+    await context.cleanup();
+  }
+}
+
 async function testBusinessValidationReturns422(): Promise<void> {
   const context = await createKnowledgeTestContext();
 
@@ -62,6 +80,7 @@ async function testBusinessValidationReturns422(): Promise<void> {
 void (async () => {
   await testCreateEntry();
   await testRejectUnsafeFilePath();
+  await testCreatePdfWithFilePathOnly();
   await testBusinessValidationReturns422();
 })().catch((error: unknown) => {
   process.stderr.write(`${String(error)}\n`);

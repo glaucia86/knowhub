@@ -102,8 +102,11 @@ export class KnowledgeRepository {
     for (const row of rows) {
       const values = result.get(row.entryId) ?? [];
       values.push(row.tagName);
-      values.sort((left, right) => left.localeCompare(right));
       result.set(row.entryId, values);
+    }
+
+    for (const values of result.values()) {
+      values.sort((left, right) => left.localeCompare(right));
     }
 
     return result;

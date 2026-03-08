@@ -1,3 +1,5 @@
+import type { KnowledgeEntryType } from './knowledge.types';
+
 export const KNOWLEDGE_EVENT_NAMES = {
   entryCreated: 'entry.created',
   entryUpdatedContent: 'entry.updated.content',
@@ -8,7 +10,7 @@ export type KnowledgeEventName = (typeof KNOWLEDGE_EVENT_NAMES)[keyof typeof KNO
 export interface EntryCreatedEvent {
   entryId: string;
   userId: string;
-  type: 'NOTE' | 'LINK' | 'PDF' | 'GITHUB';
+  type: KnowledgeEntryType;
 }
 
 export interface EntryUpdatedContentEvent {

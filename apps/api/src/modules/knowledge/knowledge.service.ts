@@ -54,8 +54,14 @@ export class KnowledgeService {
 
   private ensureSafeFilePath(filePath: string | undefined): void {
     if (filePath && !isSafeRelativeFilePath(filePath)) {
-      throw new BadRequestException('filePath must be a safe relative path');
+      throw new BadRequestException(
+        'filePath must be a safe relative path ending with .pdf, .txt, or .md',
+      );
     }
+  }
+
+  private isAllowedGithubHostname(hostname: string): boolean {
+    return hostname === 'github.com' || hostname.endsWith('.github.com');
   }
 
   private generateTitle(input: {
@@ -97,7 +103,8 @@ export class KnowledgeService {
         throw new UnprocessableEntityException('GITHUB entries require sourceUrl');
       }
 
-      if (!new URL(input.sourceUrl).hostname.includes('github.com')) {
+      const hostname = new URL(input.sourceUrl).hostname.toLowerCase();
+      if (!this.isAllowedGithubHostname(hostname)) {
         throw new UnprocessableEntityException('GITHUB entries require a github.com sourceUrl');
       }
     }

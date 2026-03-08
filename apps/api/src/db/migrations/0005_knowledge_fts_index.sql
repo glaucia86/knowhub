@@ -26,7 +26,7 @@ BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS `knowledge_entries_fts_au`
-AFTER UPDATE ON `knowledge_entries`
+AFTER UPDATE OF `title`, `content`, `user_id` ON `knowledge_entries`
 BEGIN
   DELETE FROM `knowledge_title_fts` WHERE `entry_id` = old.`id`;
   INSERT INTO `knowledge_title_fts` (`entry_id`, `user_id`, `title`, `content`)

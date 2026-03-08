@@ -128,7 +128,7 @@ describe('KnowledgeService create rules', () => {
     assert.equal(queuedType, 'NOTE');
   });
 
-  it('rejects github entries outside github.com', async () => {
+  it('rejects github entries outside github.com host patterns', async () => {
     const repository = {
       async createEntry() {},
       async getEntryByIdForUser() {
@@ -141,6 +141,13 @@ describe('KnowledgeService create rules', () => {
       service.createEntry('user-1', {
         type: 'GITHUB',
         sourceUrl: 'https://example.com/org/repo',
+      }),
+      /github\.com/,
+    );
+    await assert.rejects(
+      service.createEntry('user-1', {
+        type: 'GITHUB',
+        sourceUrl: 'https://notgithub.com/org/repo',
       }),
       /github\.com/,
     );

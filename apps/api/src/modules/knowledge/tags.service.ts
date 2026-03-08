@@ -14,17 +14,19 @@ export class TagsService {
     const normalizedTags = normalizeTagList(tagNames);
     const userTags = await this.tagsRepository.findTagsByUserId(userId);
     const tagByName = new Map(userTags.map((tag) => [tag.name, tag]));
+    const missingTagNames = normalizedTags.filter((tagName) => !tagByName.has(tagName));
+    const missingTagNameSet = new Set(missingTagNames);
 
-    for (const tagName of normalizedTags) {
-      if (tagByName.has(tagName)) {
-        continue;
-      }
-
+    for (const tagName of missingTagNames) {
       await this.tagsRepository.insertTag(userId, tagName);
+    }
+
+    if (missingTagNames.length > 0) {
       const refreshedTags = await this.tagsRepository.findTagsByUserId(userId);
-      const insertedTag = refreshedTags.find((tag) => tag.name === tagName);
-      if (insertedTag) {
-        tagByName.set(tagName, insertedTag);
+      for (const tag of refreshedTags) {
+        if (missingTagNameSet.has(tag.name)) {
+          tagByName.set(tag.name, tag);
+        }
       }
     }
 

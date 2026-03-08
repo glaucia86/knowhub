@@ -149,5 +149,3 @@ Executar antes de concluir PR:
 ```powershell
 npm run lint
 ```
-
-Referencia complementar: `C:\Labs\knowhub\teste.txt`.

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { createNoteTitle } from '../knowledge/knowledge.helpers';
 
 @Injectable()
 export class TitleGeneratorService {
@@ -14,7 +15,7 @@ export class TitleGeneratorService {
     }
 
     if (input.type === 'NOTE' && input.content) {
-      return this.createNoteTitle(input.content);
+      return createNoteTitle(input.content);
     }
 
     if (input.type === 'LINK' && input.sourceUrl) {
@@ -39,16 +40,5 @@ export class TitleGeneratorService {
     }
 
     return null;
-  }
-
-  private createNoteTitle(content: string): string {
-    const firstLine = content.split(/\r?\n/u)[0]?.trim() ?? '';
-    if (firstLine.length <= 80) {
-      return firstLine;
-    }
-
-    const truncated = firstLine.slice(0, 80);
-    const safeBreakpoint = truncated.lastIndexOf(' ');
-    return (safeBreakpoint > 20 ? truncated.slice(0, safeBreakpoint) : truncated).trim();
   }
 }
