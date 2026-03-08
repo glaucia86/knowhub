@@ -87,19 +87,19 @@ export function registerSetupCommand(program: Command): void {
 
       if (shouldResetStorage && existingClientId) {
         const secretCleanupSpinner = ora(
-          'Limpando credenciais antigas no OS Credential Store...',
+          'Cleaning up old credentials from OS Credential Store...',
         ).start();
         try {
           await credentialStoreService.cleanupClientCredentials(existingClientId);
-          secretCleanupSpinner.succeed('Credenciais antigas removidas do OS Credential Store.');
+          secretCleanupSpinner.succeed('Old credentials removed from OS Credential Store.');
         } catch {
           secretCleanupSpinner.warn(
-            'Nao foi possivel remover todas as credenciais antigas. O setup continuara normalmente.',
+            'Could not remove all old credentials. Setup will continue normally.',
           );
         }
       }
 
-      const setupSpinner = ora('Gerando identidade e segredos locais...').start();
+      const setupSpinner = ora('Generating local identity and secrets...').start();
       const crypto = cryptoService.generate();
       let writeResult: ReturnType<SetupConfigWriterService['writeConfig']>;
       try {

@@ -25,9 +25,9 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api/v1');
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('KnowHub Local API - EPIC 1.1')
-    .setDescription('Documentacao da API local (auth, health, settings).')
-    .setVersion('1.1.0')
+    .setTitle('KnowHub Local API - EPIC 1.2')
+    .setDescription('Documentacao da API local (auth, health, settings, knowledge).')
+    .setVersion('1.2.0')
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);

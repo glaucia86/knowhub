@@ -61,7 +61,7 @@ export class AuthService {
       await this.authAuditService.record('auth_failed', null, clientId, {
         reason: 'INVALID_CREDENTIALS',
       });
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Invalid credentials.');
     }
 
     const userId = await this.resolveDefaultUserId();
@@ -101,7 +101,7 @@ export class AuthService {
     const tokenHash = RefreshTokenRepository.hashToken(refreshToken);
     const existing = await this.refreshTokenRepository.findActiveByTokenHash(tokenHash);
     if (!existing) {
-      throw new UnauthorizedException('Token de renovação inválido ou expirado.');
+      throw new UnauthorizedException('Invalid or expired refresh token.');
     }
     await this.refreshTokenRepository.revoke(existing.id, 'logout');
     await this.authAuditService.record('token_revoked', existing.userId, existing.clientId);

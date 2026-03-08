@@ -89,14 +89,10 @@ function applyPendingMigrations(): { applied: number; skipped: number } {
       continue;
     }
 
-    const tx = client.sqlite.transaction(() => {
-      client.sqlite.exec(sql);
-      client.sqlite
-        .prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)')
-        .run(filename, Date.now());
-    });
-
-    tx();
+    client.sqlite.exec(sql);
+    client.sqlite
+      .prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)')
+      .run(filename, Date.now());
     applied += 1;
   }
 

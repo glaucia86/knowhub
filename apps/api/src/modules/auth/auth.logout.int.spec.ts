@@ -19,7 +19,7 @@ class AuthServiceStub {
 
   async logout(): Promise<void> {
     if (this.mode === 'fail') {
-      throw new UnauthorizedException('Token de renovacao invalido ou expirado.');
+      throw new UnauthorizedException('Invalid or expired refresh token.');
     }
   }
 }
