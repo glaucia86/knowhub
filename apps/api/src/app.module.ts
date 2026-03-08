@@ -8,6 +8,7 @@ import { DevEnvironmentModule } from './modules/dev-environment/dev-environment.
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 
 function isDevEnvironmentModuleEnabled(): boolean {
   const flag = process.env.ENABLE_DEV_ENV_ENDPOINTS;
@@ -26,6 +27,7 @@ function isDevEnvironmentModuleEnabled(): boolean {
     AuthModule,
     HealthModule,
     SettingsModule,
+    KnowledgeModule,
     ...(isDevEnvironmentModuleEnabled() ? [DevEnvironmentModule] : []),
   ],
   controllers: [SharedAssetsController, QualityGatesController],

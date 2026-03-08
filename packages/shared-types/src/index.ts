@@ -4,3 +4,5 @@ export * from './quality-gate.types';
 export * from './auth.types';
 export * from './health.types';
 export * from './settings.types';
+export * from './knowledge.types';
+export * from './events.types';

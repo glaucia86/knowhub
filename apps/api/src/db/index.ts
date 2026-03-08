@@ -31,6 +31,9 @@ export function resolveDatabasePathFromEnv(
   }
 
   const normalized = databaseUrl.trim();
+  if (normalized === ':memory:') {
+    return normalized;
+  }
   const withoutFilePrefix = normalized.startsWith('file:') ? normalized.slice(5) : normalized;
   const withExpandedHome =
     withoutFilePrefix === '~' || withoutFilePrefix.startsWith('~/')

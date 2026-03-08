@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm';
-import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import {
+  check,
+  index,
+  integer,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core';
 
 const timestampColumns = {
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
@@ -41,22 +49,25 @@ export const knowledgeEntries = sqliteTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    type: text('type', { enum: ['NOTE', 'LINK', 'PDF'] }).notNull(),
+    type: text('type', { enum: ['NOTE', 'LINK', 'PDF', 'GITHUB'] }).notNull(),
     title: text('title').notNull(),
     content: text('content'),
     sourceUrl: text('source_url'),
     filePath: text('file_path'),
     summary: text('summary'),
-    status: text('status', { enum: ['active', 'archived', 'processing', 'failed'] }).notNull(),
+    status: text('status', {
+      enum: ['PENDING', 'INDEXING', 'INDEXED', 'ARCHIVED', 'FAILED'],
+    }).notNull(),
     createdAt: timestampColumns.createdAt,
     updatedAt: timestampColumns.updatedAt,
     accessedAt: integer('accessed_at', { mode: 'timestamp_ms' }),
     archivedAt: integer('archived_at', { mode: 'timestamp_ms' }),
   },
   (table) => [
+    index('ix_knowledge_entries_user_created_id').on(table.userId, table.createdAt, table.id),
     check(
       'ck_entry_source_or_content',
-      sql`${table.content} IS NOT NULL OR ${table.sourceUrl} IS NOT NULL`,
+      sql`${table.content} IS NOT NULL OR ${table.sourceUrl} IS NOT NULL OR ${table.filePath} IS NOT NULL`,
     ),
   ],
 );
@@ -108,6 +119,19 @@ export const tags = sqliteTable(
   (table) => [uniqueIndex('ux_tag_name_user').on(table.name, table.userId)],
 );
 
+export const entryTags = sqliteTable(
+  'entry_tags',
+  {
+    entryId: text('entry_id')
+      .notNull()
+      .references(() => knowledgeEntries.id, { onDelete: 'cascade' }),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' }),
+  },
+  (table) => [uniqueIndex('ux_entry_tags_entry_tag').on(table.entryId, table.tagId)],
+);
+
 export const connectionEdges = sqliteTable(
   'connection_edges',
   {
@@ -134,7 +158,11 @@ export const connectionEdges = sqliteTable(
 export const maintenanceJobs = sqliteTable('maintenance_jobs', {
   id: text('id').primaryKey(),
   type: text('type').notNull(),
-  status: text('status', { enum: ['queued', 'running', 'completed', 'failed'] }).notNull(),
+  status: text('status', {
+    enum: ['queued', 'running', 'completed', 'failed', 'PENDING_STUB'],
+  }).notNull(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  entryId: text('entry_id').references(() => knowledgeEntries.id, { onDelete: 'cascade' }),
   payload: text('payload'),
   result: text('result'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })

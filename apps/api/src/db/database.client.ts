@@ -3,7 +3,16 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
-import { LOCAL_DATABASE_PATH } from './index';
+import { resolveDatabasePathFromEnv } from './index';
+
+function normalizeSearchText(value: unknown): string {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 export interface LocalDatabaseClient {
   sqlite: Database.Database;
@@ -18,11 +27,14 @@ function ensureDatabaseDirectory(databasePath: string): void {
   mkdirSync(databaseDirectory, { recursive: true });
 }
 
-export function createDatabaseClient(databasePath = LOCAL_DATABASE_PATH): LocalDatabaseClient {
+export function createDatabaseClient(
+  databasePath = resolveDatabasePathFromEnv(process.env.DATABASE_URL),
+): LocalDatabaseClient {
   ensureDatabaseDirectory(databasePath);
   const sqlite = new Database(databasePath);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
+  sqlite.function('normalize_search', (value: unknown) => normalizeSearchText(value));
 
   const db = drizzle(sqlite, { schema });
   return {
