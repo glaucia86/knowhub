@@ -68,11 +68,14 @@ export async function createKnowledgeTestContext(userId = 'user-1'): Promise<Kno
   await app.init();
 
   const client = getDatabaseClient();
-  await client.db.insert(users).values({
-    id: userId,
-    name: userId,
-    email: `${userId}@example.com`,
-  });
+  await client.db
+    .insert(users)
+    .values({
+      id: userId,
+      name: userId,
+      email: `${userId}@example.com`,
+    })
+    .onConflictDoNothing();
 
   return {
     request: request(app.getHttpServer()),
@@ -86,11 +89,14 @@ export async function createKnowledgeTestContext(userId = 'user-1'): Promise<Kno
       }
     },
     insertUser: async (newUserId: string) => {
-      await client.db.insert(users).values({
-        id: newUserId,
-        name: newUserId,
-        email: `${newUserId}@example.com`,
-      });
+      await client.db
+        .insert(users)
+        .values({
+          id: newUserId,
+          name: newUserId,
+          email: `${newUserId}@example.com`,
+        })
+        .onConflictDoNothing();
     },
     insertEntry: async (values) => {
       await client.db.insert(knowledgeEntries).values(values);

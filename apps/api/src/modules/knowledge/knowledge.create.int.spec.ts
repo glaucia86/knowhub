@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { KnowledgeEntryEnvelopeResponse } from '@knowhub/shared-types';
 import { createKnowledgeTestContext } from './knowledge.int-test.utils';
 
@@ -77,12 +78,7 @@ async function testBusinessValidationReturns422(): Promise<void> {
   }
 }
 
-void (async () => {
-  await testCreateEntry();
-  await testRejectUnsafeFilePath();
-  await testCreatePdfWithFilePathOnly();
-  await testBusinessValidationReturns422();
-})().catch((error: unknown) => {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-});
+test('creates note entry with normalized tags and outbox stub', testCreateEntry);
+test('rejects unsafe pdf file path', testRejectUnsafeFilePath);
+test('creates pdf entry with only filePath', testCreatePdfWithFilePathOnly);
+test('returns 422 for NOTE payload without content', testBusinessValidationReturns422);

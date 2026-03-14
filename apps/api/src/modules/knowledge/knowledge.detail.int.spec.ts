@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type {
   KnowledgeEntryDetailEnvelopeResponse,
   KnowledgeEntryEnvelopeResponse,
@@ -40,7 +41,4 @@ async function testDetailCounts(): Promise<void> {
   }
 }
 
-void testDetailCounts().catch((error: unknown) => {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-});
+test('returns detail with chunk and connection counts', testDetailCounts);

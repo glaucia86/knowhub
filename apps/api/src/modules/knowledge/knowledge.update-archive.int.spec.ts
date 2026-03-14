@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type {
   KnowledgeEntryEnvelopeResponse,
   KnowledgeEntryListResponse,
@@ -40,7 +41,4 @@ async function testUpdateAndArchive(): Promise<void> {
   }
 }
 
-void testUpdateAndArchive().catch((error: unknown) => {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-});
+test('updates metadata and archives entry', testUpdateAndArchive);

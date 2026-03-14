@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { KnowledgeEntryListResponse } from '@knowhub/shared-types';
 import { createKnowledgeTestContext } from './knowledge.int-test.utils';
 
@@ -42,7 +43,4 @@ async function testNormalizedSearch(): Promise<void> {
   }
 }
 
-void testNormalizedSearch().catch((error: unknown) => {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-});
+test('filters list by normalized search and user scope', testNormalizedSearch);

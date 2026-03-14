@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type {
   KnowledgeEntryEnvelopeResponse,
   KnowledgeEntryReindexAcceptedResponse,
@@ -60,7 +61,4 @@ async function testRestoreAndReindex(): Promise<void> {
   }
 }
 
-void testRestoreAndReindex().catch((error: unknown) => {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-});
+test('restores archived entries and handles manual reindex flow', testRestoreAndReindex);
