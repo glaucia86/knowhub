@@ -293,9 +293,20 @@ export default function IngestionLabPage(): React.JSX.Element {
     setLoading(endpoint);
     setResult(null);
 
-    const response = await action();
-    track(endpoint, response);
-    setLoading(null);
+    try {
+      const response = await action();
+      track(endpoint, response);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Falha de rede ao executar a requisicao.';
+      track(endpoint, {
+        ok: false,
+        status: 0,
+        body: { message },
+      });
+    } finally {
+      setLoading(null);
+    }
   }
 
   async function handleTextSubmit(): Promise<void> {

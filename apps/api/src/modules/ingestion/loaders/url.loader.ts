@@ -49,11 +49,17 @@ export class UrlLoader implements IContentLoader {
 
     if (this.playwright.isAvailable()) {
       try {
-        html = await withRetry(() => this.playwright.fetchHtml(input.url!, timeoutMs), {
-          maxAttempts: 3,
-          baseDelayMs: 1000,
-          onlyOnNetworkErrors: true,
-        });
+        html = await withRetry(
+          () =>
+            this.playwright.fetchHtml(input.url!, timeoutMs, async (requestUrl: string) => {
+              await this.validatePublicAddress(requestUrl);
+            }),
+          {
+            maxAttempts: 3,
+            baseDelayMs: 1000,
+            onlyOnNetworkErrors: true,
+          },
+        );
       } catch (error) {
         this.logger.warn(`Playwright failed for ${input.url}: ${(error as Error).message}`);
       }

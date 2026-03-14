@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import type {
   IngestionAcceptedResponseDto,
@@ -64,11 +65,16 @@ export class IngestionService {
       userTitle: payload.title,
     });
 
+    if (isPdf && result.content.length === 0) {
+      throw new UnprocessableEntityException(
+        'PDF does not contain selectable text. OCR is a future feature.',
+      );
+    }
+
     const created = await this.knowledgeService.createEntry(userId, {
       type: isPdf ? 'PDF' : 'NOTE',
       title: result.title,
       content: result.content.length > 0 ? result.content : undefined,
-      filePath: isPdf ? `uploads/${safeFileName}` : undefined,
       metadata: result.metadata,
     });
 

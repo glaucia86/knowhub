@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import type { IContentLoader, LoaderInput, LoaderOutput } from '@knowhub/shared-types';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class TextLoader implements IContentLoader {
     const rawText = input.rawText ?? '';
     const content = this.sanitize(rawText);
     if (content.length === 0) {
-      throw new Error('The content after sanitization is empty');
+      throw new BadRequestException('Content cannot be empty');
     }
 
     const title = input.userTitle ?? this.generateTitle(content);
