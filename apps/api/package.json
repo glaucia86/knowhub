@@ -22,7 +22,8 @@
   "dependencies": {
     "@knowhub/shared-types": "0.1.0",
     "@knowhub/shared-utils": "0.1.0",
-    "@nestjs/common": "^11.1.16",
+    "@mozilla/readability": "^0.6.0",
+    "@nestjs/common": "^11.0.15",
     "@nestjs/core": "^11.1.16",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.1",
@@ -41,11 +42,10 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "eventemitter2": "^6.4.9",
-    "ioredis": "^5.8.2",
     "iconv-lite": "^0.7.0",
-    "jsdom": "^28.1.0",
+    "ioredis": "^5.8.2",
     "joi": "^18.0.1",
-    "@mozilla/readability": "^0.6.0",
+    "jsdom": "^28.1.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pdfjs-dist": "^5.4.296",
@@ -64,7 +64,7 @@
     "@types/multer": "^2.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^7.2.0",
-    "drizzle-kit": "^0.31.5",
+    "drizzle-kit": "^0.18.1",
     "supertest": "^7.2.2"
   }
 }
