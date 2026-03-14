@@ -19,11 +19,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "cross-env": "^10.1.0",
-    "postcss": "^8.4.31",
+    "postcss": "^8.5.8",
     "tailwindcss": "^4.2.1"
   }
 }
