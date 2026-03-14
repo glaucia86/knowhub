@@ -38,11 +38,13 @@ AI-generated summaries that never leave your device.
 
 ## Development Status
 
-- Current release: `v0.4.2` (`release-v0.4.2`)
+- Current release: `v0.5.0`
 - Current phase: **Phase 1 - Core Features** (in progress)
 - Delivered in Phase 1:
   - Auth + local setup (CLI onboarding, JWT, secure credential store)
   - Knowledge Entry CRUD API (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags, lifecycle, reindex, and FTS search support
+  - Ingestion API foundation (`/ingest/text`, `/ingest/url`, `/ingest/file`) with validation, deduplication, and async URL processing
+  - Web ingestion playground (`/ingest`) for endpoint validation and quick manual testing
   - Responsive web landing page
 - In progress:
   - End-to-end semantic retrieval + AI Q&A workflows in CLI/Web
@@ -227,6 +229,14 @@ Base URL: `http://localhost:3001/api/v1`
 | `DELETE` | `/knowledge/:entryId`         | Archive an entry (soft delete, recoverable)                                    |
 | `POST`   | `/knowledge/:entryId/reindex` | Request reindexing — accepts `INDEXED` / `FAILED` entries                      |
 
+### Ingestion
+
+| Method | Endpoint       | Description                                                                      |
+| ------ | -------------- | -------------------------------------------------------------------------------- |
+| `POST` | `/ingest/text` | Ingest free text and create a knowledge entry                                   |
+| `POST` | `/ingest/url`  | Ingest a public URL asynchronously (`?force=true` to bypass deduplication)      |
+| `POST` | `/ingest/file` | Ingest a file upload (`.txt`, `.md`, `.pdf`) with server-side validation checks |
+
 Full Swagger docs: `http://localhost:3001/api`
 
 **Entry lifecycle:** `PENDING` → `INDEXING` → `INDEXED` · soft-archived via `DELETE` → `ARCHIVED` · reindexable via `POST /:id/reindex`
@@ -239,6 +249,8 @@ Full Swagger docs: `http://localhost:3001/api`
 - **Phase 1 — Core Features** 🚧
   - ✅ Auth & local setup (CLI onboarding, JWT, secure credential store)
   - ✅ Knowledge Entry CRUD (REST API · types: `NOTE` / `LINK` / `PDF` / `GITHUB` · status lifecycle · tags · FTS)
+  - ✅ Ingestion foundation (REST API for text/url/file + metadata + validation + async URL worker)
+  - ✅ Ingestion Playground UI (`/ingest`) for manual endpoint testing
   - ✅ Web landing page (Raycast/Linear design, responsive, animated)
   - 🚧 Semantic retrieval and AI Q&A flows across CLI/Web
 - **Phase 2 — Intelligence** 📋 Semantic connections, tagging, summarization

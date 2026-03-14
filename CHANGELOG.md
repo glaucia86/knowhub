@@ -2,6 +2,45 @@
 
 All notable changes to this repository are documented in this file.
 
+## [v0.5.0] - 2026-03-14
+
+### Added
+
+- EPIC-1.3 ingestion foundation for API and Web:
+  - New API module `ingestion` with endpoints:
+    - `POST /api/v1/ingest/text`
+    - `POST /api/v1/ingest/url` (supports deduplication and `?force=true`)
+    - `POST /api/v1/ingest/file` (`.txt`, `.md`, `.pdf`)
+  - New DTOs/contracts for ingestion payload and response handling.
+  - New async ingestion queue and URL fetch worker flow.
+  - New loaders for `text`, `markdown`, `url`, and `pdf`, with loader factory abstraction.
+  - SSRF protection validator for public URL ingestion.
+  - New migration `0007_add_ingestion_metadata.sql` and schema updates for ingestion metadata.
+- Shared packages:
+  - `packages/shared-types`: new `ingestion.types.ts` with loader interfaces and metadata contracts.
+  - `packages/shared-utils`: new `fingerprint-content.ts` and `with-retry.ts`.
+- Web:
+  - New ingestion validation interface at `apps/web/app/ingest/page.tsx` (Ingestion Playground).
+  - UI supports token generation helper, endpoint testing (`text/url/file`), request history, and response inspection.
+
+### Changed
+
+- API configuration and module wiring to support ingestion runtime options and queue processing.
+- Knowledge contracts/repository integration to persist and expose ingestion-related metadata.
+- Auth module/controller updated to support local token generation flow used by ingestion validation UI.
+- Documentation alignment with current product state, command references, and validation guidelines.
+
+### Fixed
+
+- Ingestion services improved with stronger error handling and payload validation.
+- URL, text, and file loaders hardened for more predictable extraction and failure behavior.
+- Test/build execution flow adjustments in `apps/api/package.json` and `turbo.json` to reduce test task friction.
+
+### Dependencies
+
+- Production dependency bump group (9 updates) across workspaces.
+- Development dependency bump group (5 updates) with lockfile refresh.
+
 ## [v0.4.2] - 2026-03-08
 
 ### Added
