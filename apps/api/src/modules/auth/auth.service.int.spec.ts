@@ -36,6 +36,7 @@ describe('AuthService', () => {
           auditEvents.push(eventType);
         },
       } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -58,6 +59,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -80,6 +82,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, []);
 
@@ -101,6 +104,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -131,6 +135,7 @@ describe('AuthService', () => {
           auditEvents.push(eventType);
         },
       } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -161,6 +166,7 @@ describe('AuthService', () => {
           auditEvents.push(eventType);
         },
       } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -197,6 +203,7 @@ describe('AuthService', () => {
         },
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -233,6 +240,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -261,6 +269,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -293,6 +302,7 @@ describe('AuthService', () => {
         },
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -313,6 +323,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 
@@ -332,6 +343,7 @@ describe('AuthService', () => {
         revoke: async () => undefined,
       } as never,
       { record: async () => undefined } as never,
+      {} as never,
     );
     setServiceDb(service, [{ id: 'u1' }]);
 

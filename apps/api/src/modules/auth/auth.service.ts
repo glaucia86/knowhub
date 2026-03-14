@@ -5,6 +5,7 @@ import type { AuthTokenPayload, TokenPairResponse } from '@knowhub/shared-types'
 import { getDatabaseClient } from '../../db/database.client';
 import { users } from '../../db/schema';
 import { CredentialStoreService } from '../../config/credential-store.service';
+import { KnowHubConfigService } from '../../config/knowhub-config.service';
 import { AuthAuditService } from './auth-audit.service';
 import { RefreshTokenRepository } from './refresh-token.repository';
 
@@ -36,6 +37,7 @@ export class AuthService {
     private readonly credentialStoreService: CredentialStoreService,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly authAuditService: AuthAuditService,
+    private readonly knowHubConfigService: KnowHubConfigService,
   ) {}
 
   private getDb(): UserLookupDatabase {
@@ -51,6 +53,17 @@ export class AuthService {
       throw new UnauthorizedException('No local user provisioned. Run setup first.');
     }
     return rows[0].id;
+  }
+
+  async issueLocalTokenPair(): Promise<TokenPairResponse> {
+    const config = this.knowHubConfigService.readLocalConfig();
+    const clientSecret = await this.credentialStoreService.getSecret('knowhub', config.clientId);
+    if (!clientSecret) {
+      throw new UnauthorizedException(
+        'Client secret not found in credential store. Run setup again.',
+      );
+    }
+    return this.issueTokenPair(config.clientId, clientSecret);
   }
 
   async issueTokenPair(clientId: string, clientSecret: string): Promise<TokenPairResponse> {

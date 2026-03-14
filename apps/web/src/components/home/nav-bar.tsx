@@ -8,6 +8,7 @@ const navLinks = [
   { href: '#features', label: 'Features' },
   { href: '#how-it-works', label: 'How it works' },
   { href: '#privacy', label: 'Privacy' },
+  { href: '/ingest', label: 'Ingestion Lab' },
 ] as const;
 
 function KnowHubLogo(): React.JSX.Element {
@@ -40,7 +41,6 @@ export function NavBar(): React.JSX.Element {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3 md:px-10">
         <KnowHubLogo />
 
-        {/* Desktop nav */}
         <ul className="hidden items-center gap-0.5 md:flex" role="list">
           {navLinks.map(({ href, label }) => (
             <li key={href}>
@@ -54,7 +54,6 @@ export function NavBar(): React.JSX.Element {
           ))}
         </ul>
 
-        {/* Desktop CTAs */}
         <div className="hidden items-center gap-2 md:flex">
           <a
             href="https://github.com/glaucia86/knowhub"
@@ -66,14 +65,13 @@ export function NavBar(): React.JSX.Element {
             GitHub
           </a>
           <a
-            href="#how-it-works"
+            href="/ingest"
             className="kh-glow rounded-lg bg-[var(--kh-highlight)] px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-[#368f7c] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
-            Get Started
+            Test Ingestion
           </a>
         </div>
 
-        {/* Mobile hamburger */}
         <button
           type="button"
           className="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--kh-highlight)] md:hidden"
@@ -85,7 +83,6 @@ export function NavBar(): React.JSX.Element {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -119,11 +116,11 @@ export function NavBar(): React.JSX.Element {
                   View on GitHub
                 </a>
                 <a
-                  href="#how-it-works"
+                  href="/ingest"
                   className="rounded-lg bg-[var(--kh-highlight)] px-4 py-2 text-center text-sm font-semibold text-white"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Get Started
+                  Test Ingestion
                 </a>
               </li>
             </ul>

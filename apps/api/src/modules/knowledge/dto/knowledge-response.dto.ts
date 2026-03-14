@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { EntryMetadata } from '@knowhub/shared-types';
 
 export class PaginationMetaDto {
   @ApiProperty()
@@ -35,6 +36,9 @@ export class KnowledgeEntryResponseDto {
 
   @ApiProperty({ required: false })
   filePath?: string;
+
+  @ApiProperty({ required: false, type: Object })
+  metadata?: EntryMetadata;
 
   @ApiProperty({ nullable: true })
   summary!: string | null;
