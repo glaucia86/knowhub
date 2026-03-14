@@ -2,7 +2,7 @@
 
 All notable changes to this repository are documented in this file.
 
-## [v0.5.0] - 2026-03-10
+## [v0.4.2] - 2026-03-08
 
 ### Added
 
@@ -34,6 +34,19 @@ All notable changes to this repository are documented in this file.
 - `apps/api/src/main.ts`: Swagger enabled with `Knowledge` tag and Bearer security configuration.
 - `apps/web/app/layout.tsx`: Inter font via `next/font/google` and full metadata export.
 - `apps/web/app/globals.css`: design system extended with new utility classes and keyframes.
+
+### Fixed
+
+- Knowledge API: `GITHUB` source validation hardened to allow only `github.com` and `*.github.com` hosts.
+- Knowledge API/DB: alignment between PDF payload validation and migrated schema via `0006_allow_pdf_filepath_only.sql`.
+- FTS maintenance: update trigger now executes only when `title`, `content`, or `user_id` changes.
+- Tags sync: removed per-tag full-list re-fetch loop in `TagsService` (`N+1` reduction).
+- Knowledge repository: tag sorting in `loadTagsByEntryIds` now runs once per entry after accumulation.
+- Shared contracts/utilities:
+  - `EntryCreatedEvent.type` now reuses `KnowledgeEntryType`.
+  - SQLite `normalize_search` UDF now reuses shared `normalizeSearchText`.
+  - `TitleGeneratorService` now reuses shared `createNoteTitle`.
+- Docs: removed machine-specific local path from `docs/testing/epic-1.2-validation.md`.
 
 ## [v0.4.1] - 2026-03-04
 

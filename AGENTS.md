@@ -15,13 +15,25 @@ KnowHub — TypeScript monorepo. Package manager: **npm** (workspaces from root)
 ## Commands
 
 - Lint: `npm run lint`
+- Test: `npm run test`
 - Build core (no web): `npm run build` · Full: `npm run build:all`
 - Dev core: `npm run dev` · Web only: `npm run dev:web`
+- Database (API workspace): `npm run db:migrate` · `npm run db:seed` · `npm run db:reset`
 
 ## Rules
 
 - Scope changes to the affected workspace.
 - Run `npm run lint` before proposing final changes.
+- Prefer `npm run build -w @knowhub/api` when validating API-only changes.
+
+## Current Delivery State
+
+- Current release tag: `v0.4.2` (`release-v0.4.2`)
+- EPIC-1.2 delivered: Knowledge Entry CRUD (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags and FTS.
+- Prioritize consistency between:
+  - API validation rules
+  - shared contracts in `packages/shared-types`
+  - SQL migrations under `apps/api/src/db/migrations`
 
 ## Progressive Disclosure
 

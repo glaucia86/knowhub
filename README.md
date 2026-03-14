@@ -14,7 +14,7 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/>
   </a>
   <a href="https://nodejs.org/">
-    <img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen" alt="Node.js 22+"/>
+    <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node.js 20+"/>
   </a>
   <a href="CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/>
@@ -35,6 +35,17 @@ KnowHub AI Assistant is a **local-first**, privacy-by-default knowledge manager
 powered by AI. It helps developers capture, organize, and retrieve knowledge
 from notes, links, PDFs, GitHub issues and more — with semantic search and
 AI-generated summaries that never leave your device.
+
+## Development Status
+
+- Current release: `v0.4.2` (`release-v0.4.2`)
+- Current phase: **Phase 1 - Core Features** (in progress)
+- Delivered in Phase 1:
+  - Auth + local setup (CLI onboarding, JWT, secure credential store)
+  - Knowledge Entry CRUD API (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags, lifecycle, reindex, and FTS search support
+  - Responsive web landing page
+- In progress:
+  - End-to-end semantic retrieval + AI Q&A workflows in CLI/Web
 
 |                      🔒 Privacy First                      |                  🧠 Second Brain                   |                     💻 Dev-Focused                     |                 🌍 Open Source                 |
 | :--------------------------------------------------------: | :------------------------------------------------: | :----------------------------------------------------: | :--------------------------------------------: |
@@ -91,7 +102,7 @@ All components run locally. CLI and Web UI talk to the NestJS API, which stores 
 
 ### Prerequisites
 
-- [Node.js 22+](https://nodejs.org/)
+- [Node.js 20+](https://nodejs.org/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose plugin)
 - [Git](https://git-scm.com/)
 
@@ -229,7 +240,7 @@ Full Swagger docs: `http://localhost:3001/api`
   - ✅ Auth & local setup (CLI onboarding, JWT, secure credential store)
   - ✅ Knowledge Entry CRUD (REST API · types: `NOTE` / `LINK` / `PDF` / `GITHUB` · status lifecycle · tags · FTS)
   - ✅ Web landing page (Raycast/Linear design, responsive, animated)
-  - 📋 Semantic search and AI Q&A via CLI
+  - 🚧 Semantic retrieval and AI Q&A flows across CLI/Web
 - **Phase 2 — Intelligence** 📋 Semantic connections, tagging, summarization
 - **Phase 3 — Integrations** 📋 Telegram bot, GitHub issues, PDF ingestion
 - **Phase 4 — Polish** 📋 Full Web app, multi-user support, cloud sync (opt-in)

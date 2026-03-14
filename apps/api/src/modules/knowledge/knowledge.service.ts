@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type {
+  EntryMetadata,
   EntryCreatedEvent,
   EntryUpdatedContentEvent,
   KnowledgeEntryDetailEnvelopeResponse,
@@ -146,6 +147,7 @@ export class KnowledgeService {
       content: entry.content ?? undefined,
       sourceUrl: entry.sourceUrl ?? undefined,
       filePath: entry.filePath ?? undefined,
+      metadata: entry.metadata ?? undefined,
       summary: entry.summary,
       status: entry.status,
       tags: entry.tags,
@@ -168,11 +170,13 @@ export class KnowledgeService {
   async createEntry(
     userId: string,
     payload: CreateKnowledgeEntryDto,
+    options: { skipCreatedEvent?: boolean } = {},
   ): Promise<KnowledgeEntryEnvelopeResponse> {
     const title = trimToUndefined(payload.title);
     const content = trimToUndefined(payload.content);
     const sourceUrl = trimToUndefined(payload.sourceUrl);
     const filePath = trimToUndefined(payload.filePath);
+    const metadata = payload.metadata;
     const tags = normalizeTagList(payload.tags);
 
     this.validatePayload({
@@ -197,10 +201,13 @@ export class KnowledgeService {
       content,
       sourceUrl,
       filePath,
+      metadata,
       status: 'PENDING',
     });
     await this.tagsService.syncEntryTags(userId, entryId, tags);
-    await this.emitOrEnqueueCreatedEvent({ entryId, userId, type: payload.type });
+    if (!options.skipCreatedEvent) {
+      await this.emitOrEnqueueCreatedEvent({ entryId, userId, type: payload.type });
+    }
 
     return {
       data: this.mapEntry(
@@ -276,6 +283,8 @@ export class KnowledgeService {
       payload.filePath === undefined
         ? (current.filePath ?? undefined)
         : trimToUndefined(payload.filePath);
+    const metadata =
+      payload.metadata === undefined ? (current.metadata ?? undefined) : payload.metadata;
 
     this.validatePayload({
       type: current.type,
@@ -293,6 +302,7 @@ export class KnowledgeService {
       content: content ?? null,
       sourceUrl: sourceUrl ?? null,
       filePath: filePath ?? null,
+      metadata: metadata ?? null,
       summary: contentChanged ? null : current.summary,
       status: contentChanged ? 'PENDING' : current.status,
     });
@@ -346,6 +356,8 @@ export class KnowledgeService {
       payload.filePath === undefined
         ? (current.filePath ?? undefined)
         : trimToUndefined(payload.filePath);
+    const metadata =
+      payload.metadata === undefined ? (current.metadata ?? undefined) : payload.metadata;
 
     this.validatePayload({
       type: current.type,
@@ -364,6 +376,7 @@ export class KnowledgeService {
       content: content ?? null,
       sourceUrl: sourceUrl ?? null,
       filePath: filePath ?? null,
+      metadata: metadata ?? null,
       summary: nextStatus === 'PENDING' ? null : current.summary,
       status: nextStatus,
       archivedAt: null,
@@ -382,6 +395,51 @@ export class KnowledgeService {
         this.requireEntry(await this.knowledgeRepository.getEntryByIdForUser(userId, current.id)),
       ),
     };
+  }
+
+  async findBySourceUrl(userId: string, sourceUrl: string): Promise<KnowledgeEntryResponse | null> {
+    const entry = await this.knowledgeRepository.findMostRecentBySourceUrlForUser(
+      userId,
+      sourceUrl,
+    );
+    return entry ? this.mapEntry(entry) : null;
+  }
+
+  async finalizeIngestedUrlEntry(input: {
+    userId: string;
+    entryId: string;
+    sourceUrl: string;
+    content: string;
+    title: string;
+    metadata?: EntryMetadata;
+  }): Promise<void> {
+    const current = this.requireEntry(
+      await this.knowledgeRepository.getEntryByIdForUser(input.userId, input.entryId),
+    );
+    if (current.status === 'ARCHIVED') {
+      return;
+    }
+
+    await this.knowledgeRepository.updateEntry(input.userId, input.entryId, {
+      sourceUrl: input.sourceUrl,
+      content: input.content,
+      title: input.title,
+      metadata: input.metadata ?? null,
+      summary: null,
+      status: 'PENDING',
+    });
+
+    await this.emitOrEnqueueContentUpdatedEvent({
+      entryId: input.entryId,
+      userId: input.userId,
+    });
+  }
+
+  async markEntryFailed(userId: string, entryId: string, reason: string): Promise<void> {
+    await this.knowledgeRepository.updateEntry(userId, entryId, {
+      status: 'FAILED',
+      summary: reason,
+    });
   }
 
   async reindexEntry(

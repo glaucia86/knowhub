@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { EntryMetadata } from '@knowhub/shared-types';
 import {
   check,
   index,
@@ -54,6 +55,7 @@ export const knowledgeEntries = sqliteTable(
     content: text('content'),
     sourceUrl: text('source_url'),
     filePath: text('file_path'),
+    metadata: text('metadata', { mode: 'json' }).$type<EntryMetadata | null>(),
     summary: text('summary'),
     status: text('status', {
       enum: ['PENDING', 'INDEXING', 'INDEXED', 'ARCHIVED', 'FAILED'],

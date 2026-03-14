@@ -39,6 +39,11 @@ function isInvalidBoolean(value: string): boolean {
   return value !== 'true' && value !== 'false';
 }
 
+function isInvalidInteger(value: string, min: number, max: number): boolean {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) || parsed < min || parsed > max;
+}
+
 function resolveEffectiveValue(
   spec: EnvironmentVariableSpec,
   values: Record<string, string | undefined>,
@@ -71,6 +76,12 @@ export function validateEnvironmentValues(
 
     if (spec.name === 'ENABLE_EXTERNAL_AI' && isInvalidBoolean(value)) {
       invalidValues.push(`${spec.name} must be true or false`);
+    }
+    if (spec.name === 'INGEST_URL_TIMEOUT_MS' && isInvalidInteger(value, 1000, 60000)) {
+      invalidValues.push(`${spec.name} must be an integer between 1000 and 60000`);
+    }
+    if (spec.name === 'MAX_PDF_CONCURRENCY' && isInvalidInteger(value, 1, 10)) {
+      invalidValues.push(`${spec.name} must be an integer between 1 and 10`);
     }
   }
 

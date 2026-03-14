@@ -1,3 +1,5 @@
+import type { EntryMetadata } from './ingestion.types';
+
 export type KnowledgeEntryType = 'NOTE' | 'LINK' | 'PDF' | 'GITHUB';
 export type KnowledgeEntryStatus = 'PENDING' | 'INDEXING' | 'INDEXED' | 'ARCHIVED' | 'FAILED';
 export type MaintenanceJobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'PENDING_STUB';
@@ -15,6 +17,7 @@ export interface CreateKnowledgeEntryRequest {
   content?: string;
   sourceUrl?: string;
   filePath?: string;
+  metadata?: EntryMetadata;
   tags?: string[];
 }
 
@@ -23,6 +26,7 @@ export interface UpdateKnowledgeEntryRequest {
   content?: string;
   sourceUrl?: string;
   filePath?: string;
+  metadata?: EntryMetadata;
   tags?: string[];
 }
 
@@ -34,6 +38,7 @@ export interface KnowledgeEntryResponse {
   content?: string;
   sourceUrl?: string;
   filePath?: string;
+  metadata?: EntryMetadata;
   summary: string | null;
   status: KnowledgeEntryStatus;
   tags: string[];

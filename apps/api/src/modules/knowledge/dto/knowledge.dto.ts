@@ -7,6 +7,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsObject,
   IsUrl,
   Max,
   MaxLength,
@@ -15,6 +16,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type {
+  EntryMetadata,
   KnowledgeEntryListQuery,
   KnowledgeEntryStatus,
   KnowledgeEntryType,
@@ -53,6 +55,11 @@ export class CreateKnowledgeEntryDto {
   @MaxLength(1024)
   @IsSafeFilePath()
   filePath?: string;
+
+  @ApiPropertyOptional({ description: 'Optional ingestion metadata object.' })
+  @IsOptional()
+  @IsObject()
+  metadata?: EntryMetadata;
 
   @ApiPropertyOptional({ type: [String], maxItems: 20 })
   @IsOptional()
@@ -93,6 +100,11 @@ export class UpdateKnowledgeEntryDto {
   @MaxLength(1024)
   @IsSafeFilePath()
   filePath?: string;
+
+  @ApiPropertyOptional({ description: 'Optional ingestion metadata object.' })
+  @IsOptional()
+  @IsObject()
+  metadata?: EntryMetadata;
 
   @ApiPropertyOptional({ type: [String], maxItems: 20 })
   @IsOptional()

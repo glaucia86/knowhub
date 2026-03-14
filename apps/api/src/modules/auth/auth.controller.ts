@@ -14,6 +14,17 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Post('local-token')
+  @ApiOperation({ summary: 'Issue token using server-side local credentials (no body required)' })
+  @ApiResponse({ status: 200, description: 'Tokens issued successfully' })
+  @ApiResponse({ status: 401, description: 'Setup not completed or credentials unavailable' })
+  @ApiResponse({ status: 429, description: 'Too many attempts. Please wait 60 seconds.' })
+  async localToken(@Req() req: { ip?: string }) {
+    this.authRateLimitService.checkAndConsume(req.ip ?? 'local');
+    return this.authService.issueLocalTokenPair();
+  }
+
+  @Public()
   @Post('token')
   @ApiOperation({ summary: 'Issue token pairs from local credentials' })
   @ApiResponse({ status: 200, description: 'Tokens issued successfully' })

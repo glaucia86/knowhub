@@ -12,5 +12,6 @@ import { TagsModule } from './tags.module';
   imports: [EventEmitterModule.forRoot(), SharedModule, TagsModule, ReindexModule],
   controllers: [KnowledgeController],
   providers: [KnowledgeRepository, KnowledgeService, SafeFilePathConstraint],
+  exports: [KnowledgeRepository, KnowledgeService],
 })
 export class KnowledgeModule {}

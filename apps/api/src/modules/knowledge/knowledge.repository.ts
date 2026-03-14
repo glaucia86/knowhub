@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { and, desc, eq, inArray, ne, or, sql, type SQL } from 'drizzle-orm';
 import type {
+  EntryMetadata,
   KnowledgeEntryStatus,
   KnowledgeEntryType,
   MaintenanceJobStatus,
@@ -26,6 +27,7 @@ export interface KnowledgeEntryRecord {
   content: string | null;
   sourceUrl: string | null;
   filePath: string | null;
+  metadata: EntryMetadata | null;
   summary: string | null;
   status: KnowledgeEntryStatus;
   createdAt: Date;
@@ -48,6 +50,7 @@ export interface CreateKnowledgeEntryRecord {
   content?: string;
   sourceUrl?: string;
   filePath?: string;
+  metadata?: EntryMetadata;
   summary?: string;
   status: KnowledgeEntryStatus;
 }
@@ -57,6 +60,7 @@ export interface UpdateKnowledgeEntryRecord {
   content?: string | null;
   sourceUrl?: string | null;
   filePath?: string | null;
+  metadata?: EntryMetadata | null;
   summary?: string | null;
   status?: KnowledgeEntryStatus;
   archivedAt?: Date | null;
@@ -124,6 +128,7 @@ export class KnowledgeRepository {
       content: row.content,
       sourceUrl: row.sourceUrl,
       filePath: row.filePath,
+      metadata: row.metadata as EntryMetadata | null,
       summary: row.summary,
       status: row.status as KnowledgeEntryStatus,
       createdAt: row.createdAt,
@@ -144,6 +149,7 @@ export class KnowledgeRepository {
       content: entry.content ?? null,
       sourceUrl: entry.sourceUrl ?? null,
       filePath: entry.filePath ?? null,
+      metadata: entry.metadata ?? null,
       summary: entry.summary ?? null,
       status: entry.status,
       createdAt: now,
@@ -225,6 +231,24 @@ export class KnowledgeRepository {
     return this.mapEntry(rows[0], tagMap);
   }
 
+  async findMostRecentBySourceUrlForUser(
+    userId: string,
+    sourceUrl: string,
+  ): Promise<KnowledgeEntryRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(knowledgeEntries)
+      .where(and(eq(knowledgeEntries.userId, userId), eq(knowledgeEntries.sourceUrl, sourceUrl)))
+      .orderBy(desc(knowledgeEntries.createdAt), desc(knowledgeEntries.id))
+      .limit(1);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    const tagMap = await this.loadTagsByEntryIds([rows[0].id]);
+    return this.mapEntry(rows[0], tagMap);
+  }
+
   async getEntryDetailForUser(
     userId: string,
     entryId: string,
@@ -262,6 +286,7 @@ export class KnowledgeRepository {
         content: updates.content,
         sourceUrl: updates.sourceUrl,
         filePath: updates.filePath,
+        metadata: updates.metadata,
         summary: updates.summary,
         status: updates.status,
         archivedAt: updates.archivedAt,
