@@ -45,7 +45,7 @@
     "iconv-lite": "^0.7.0",
     "ioredis": "^5.8.2",
     "joi": "^18.0.1",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pdfjs-dist": "^5.4.296",
