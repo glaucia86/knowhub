@@ -35,7 +35,7 @@
   - release GitHub automática com notas geradas do histórico.
   - placeholder mantido para futura publicação do pacote CLI.
 - Estado atual:
-  - últimas tags publicadas: `v0.4.2` e `release-v0.4.2`.
+  - última tag estável: `v0.6.0`.
 
 ### Community operations
 
@@ -88,3 +88,11 @@ When this happens:
   1. `npm run build -w @knowhub/api`
   2. `npm run lint`
 - When changing contracts or migrations, validate cross-workspace impact (`@knowhub/shared-types`, `@knowhub/shared-utils`, `apps/api`).
+
+## Indexing Module Checks (EPIC-1.4)
+
+- Validate queue/indexing changes with:
+  1. `npm run build -w @knowhub/api`
+  2. `npm run lint`
+- For reindex flows, preserve `jobId` correlation between API response, event payload, and outbox drain.
+- For worker state transitions, never overwrite `ARCHIVED` entries and keep updates tenant-scoped (`entryId + userId`).

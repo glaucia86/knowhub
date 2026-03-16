@@ -28,8 +28,10 @@ KnowHub — TypeScript monorepo. Package manager: **npm** (workspaces from root)
 
 ## Current Delivery State
 
-- Current release tag: `v0.4.2` (`release-v0.4.2`)
+- Current release tag: `v0.6.0`
 - EPIC-1.2 delivered: Knowledge Entry CRUD (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags and FTS.
+- EPIC-1.3 delivered: Ingestion foundation (`/ingest/text`, `/ingest/url`, `/ingest/file`) with async URL worker.
+- EPIC-1.4 delivered: Indexing pipeline foundation (queue worker, progress events, reindex drain, checkpoint persistence).
 - Prioritize consistency between:
   - API validation rules
   - shared contracts in `packages/shared-types`

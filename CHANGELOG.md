@@ -2,6 +2,35 @@
 
 All notable changes to this repository are documented in this file.
 
+## [v0.6.0] - 2026-03-16
+
+### Added
+
+- EPIC-1.4 indexing pipeline foundation in API:
+  - BullMQ indexing worker with step-based processing (`LOAD`, `SPLIT`, `EMBED`, `STORE`, `SUMMARIZE`, `TAG`).
+  - Indexing queue orchestration for create/update/reindex flows.
+  - Indexing progress events (`started`, `completed`, `failed`) and failure classification with permanent errors.
+  - Startup drain for pending indexing stubs and pending reindex maintenance jobs.
+  - Initial checkpoint persistence for indexing runs in `indexing_checkpoints`.
+
+### Changed
+
+- Reindex correlation now uses explicit queue job IDs across in-process and outbox paths.
+- Indexing payload now separates `aiModel` from `embeddingModel` to match `user_settings` and chunk metadata persistence.
+- Admin queue controller now uses lazy queue initialization and closes Redis connections on module shutdown.
+- Agent operational docs updated (`AGENTS.md`, `docs/agent/*`) to align with current release state and indexing delivery.
+
+### Fixed
+
+- Prevented archived entries from being revived by delayed indexing jobs (state-guarded status transitions).
+- Hardened multi-tenant safety in indexing writes:
+  - ownership validation in loader node (`entry.userId` vs `job.userId`);
+  - summary updates scoped by `entryId + userId`;
+  - chunk deletion scoped by `entryId + userId`.
+- Reduced startup log noise when Redis is unavailable during pending drain.
+- Added error logging in summary step fallback path (no silent swallow).
+- Removed duplicate stop-word entry and tightened indexing error typing (`IndexingStep`).
+
 ## [v0.5.0] - 2026-03-14
 
 ### Added

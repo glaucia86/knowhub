@@ -22,10 +22,12 @@
 
 ## Current Product State
 
-- Release baseline: `v0.4.2`.
+- Release baseline: `v0.6.0`.
 - Delivered:
   - EPIC-1.1: auth, setup, health, settings.
   - EPIC-1.2: Knowledge Entry CRUD (types `NOTE`, `LINK`, `PDF`, `GITHUB`), tags, FTS, reindex flow.
+  - EPIC-1.3: ingestion foundation (`text/url/file` + async URL worker + metadata).
+  - EPIC-1.4: indexing pipeline (worker nodes, queue orchestration, progress events, checkpoint persistence).
 - When touching knowledge flows, keep these layers aligned:
   1. DTO/service validation in `apps/api`.
   2. Database schema and SQL migrations in `apps/api/src/db`.

@@ -38,12 +38,13 @@ AI-generated summaries that never leave your device.
 
 ## Development Status
 
-- Current release: `v0.5.0`
+- Current release: `v0.6.0`
 - Current phase: **Phase 1 - Core Features** (in progress)
 - Delivered in Phase 1:
   - Auth + local setup (CLI onboarding, JWT, secure credential store)
   - Knowledge Entry CRUD API (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags, lifecycle, reindex, and FTS search support
   - Ingestion API foundation (`/ingest/text`, `/ingest/url`, `/ingest/file`) with validation, deduplication, and async URL processing
+  - Indexing pipeline foundation (worker + queue + progress events + checkpoint persistence + reindex drain)
   - Web ingestion playground (`/ingest`) for endpoint validation and quick manual testing
   - Responsive web landing page
 - In progress:
@@ -241,6 +242,8 @@ Full Swagger docs: `http://localhost:3001/api`
 
 **Entry lifecycle:** `PENDING` → `INDEXING` → `INDEXED` · soft-archived via `DELETE` → `ARCHIVED` · reindexable via `POST /:id/reindex`
 
+**Indexing reliability notes:** archived entries are protected from delayed job overwrites, reindex requests return a stable queue correlation `jobId`, and indexing writes are tenant-scoped.
+
 ---
 
 ## Roadmap
@@ -250,6 +253,7 @@ Full Swagger docs: `http://localhost:3001/api`
   - ✅ Auth & local setup (CLI onboarding, JWT, secure credential store)
   - ✅ Knowledge Entry CRUD (REST API · types: `NOTE` / `LINK` / `PDF` / `GITHUB` · status lifecycle · tags · FTS)
   - ✅ Ingestion foundation (REST API for text/url/file + metadata + validation + async URL worker)
+  - ✅ Indexing pipeline foundation (queue worker, event progress, reindex reliability, checkpoints)
   - ✅ Ingestion Playground UI (`/ingest`) for manual endpoint testing
   - ✅ Web landing page (Raycast/Linear design, responsive, animated)
   - 🚧 Semantic retrieval and AI Q&A flows across CLI/Web
