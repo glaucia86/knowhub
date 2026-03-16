@@ -46,4 +46,41 @@ export class TagsService {
     const missingTagIds = desiredTagIds.filter((tagId) => !currentSet.has(tagId));
     await this.tagsRepository.insertAssociations(entryId, missingTagIds);
   }
+
+  async syncSuggestedTags(
+    entryId: string,
+    userId: string,
+    suggestedTagNames: string[],
+  ): Promise<void> {
+    const normalized = normalizeTagList(suggestedTagNames);
+    if (normalized.length === 0) {
+      return;
+    }
+
+    const userTags = await this.tagsRepository.findTagsByUserId(userId);
+    const tagByName = new Map(userTags.map((tag) => [tag.name, tag]));
+    const toCreate = normalized.filter((name) => !tagByName.has(name));
+    const toCreateSet = new Set(toCreate);
+
+    for (const tagName of toCreate) {
+      await this.tagsRepository.insertTag(userId, tagName);
+    }
+
+    if (toCreate.length > 0) {
+      const refreshed = await this.tagsRepository.findTagsByUserId(userId);
+      for (const tag of refreshed) {
+        if (toCreateSet.has(tag.name)) {
+          tagByName.set(tag.name, tag);
+        }
+      }
+    }
+
+    const existingAssociations = await this.tagsRepository.findAssociationsByEntryId(entryId);
+    const existingTagIds = new Set(existingAssociations.map((association) => association.tagId));
+    const toAssociate = normalized
+      .map((name) => tagByName.get(name)?.id)
+      .filter((id): id is string => typeof id === 'string' && !existingTagIds.has(id));
+
+    await this.tagsRepository.insertAssociations(entryId, toAssociate);
+  }
 }

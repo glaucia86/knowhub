@@ -34,12 +34,8 @@ async function testRestoreAndReindex(): Promise<void> {
 
     assert.equal(reindexResponse.status, 202);
     assert.equal(reindexPayload.entryId, entryId);
-    assert.equal(reindexPayload.status, 'PENDING_STUB');
-
-    const jobs = await context.findMaintenanceJobs(entryId);
-    assert.equal(jobs.length, 2);
-    assert.equal(jobs[1]?.type, 'REINDEX');
-    assert.equal(jobs[1]?.status, 'PENDING_STUB');
+    assert.equal(reindexPayload.status, 'QUEUED');
+    assert.equal(reindexPayload.jobId, `indexing-${entryId}`);
 
     const conflictResponse = await context.request
       .post(`/api/v1/knowledge/${entryId}/reindex`)

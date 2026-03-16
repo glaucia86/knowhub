@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { and, desc, eq, inArray, ne, or, sql, type SQL } from 'drizzle-orm';
 import type {
+  AIProvider,
   EntryMetadata,
   KnowledgeEntryStatus,
   KnowledgeEntryType,
@@ -12,6 +13,7 @@ import { getDatabaseClient } from '../../db/database.client';
 import {
   connectionEdges,
   contentChunks,
+  userSettings,
   entryTags,
   knowledgeEntries,
   maintenanceJobs,
@@ -29,6 +31,7 @@ export interface KnowledgeEntryRecord {
   filePath: string | null;
   metadata: EntryMetadata | null;
   summary: string | null;
+  lastError?: string | null;
   status: KnowledgeEntryStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -62,8 +65,19 @@ export interface UpdateKnowledgeEntryRecord {
   filePath?: string | null;
   metadata?: EntryMetadata | null;
   summary?: string | null;
+  lastError?: string | null;
   status?: KnowledgeEntryStatus;
   archivedAt?: Date | null;
+}
+
+export interface ContentChunkRecord {
+  id: string;
+  entryId: string;
+  chunkIndex: number;
+  content: string;
+  tokenCount: number;
+  embedding?: number[] | null;
+  embeddingModel?: string | null;
 }
 
 export interface CreateMaintenanceJobInput {
@@ -130,6 +144,7 @@ export class KnowledgeRepository {
       filePath: row.filePath,
       metadata: row.metadata as EntryMetadata | null,
       summary: row.summary,
+      lastError: row.lastError,
       status: row.status as KnowledgeEntryStatus,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -151,6 +166,7 @@ export class KnowledgeRepository {
       filePath: entry.filePath ?? null,
       metadata: entry.metadata ?? null,
       summary: entry.summary ?? null,
+      lastError: null,
       status: entry.status,
       createdAt: now,
       updatedAt: now,
@@ -231,6 +247,19 @@ export class KnowledgeRepository {
     return this.mapEntry(rows[0], tagMap);
   }
 
+  async getEntryByIdInternal(entryId: string): Promise<KnowledgeEntryRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(knowledgeEntries)
+      .where(eq(knowledgeEntries.id, entryId))
+      .limit(1);
+    if (rows.length === 0) {
+      return null;
+    }
+    const tagMap = await this.loadTagsByEntryIds([entryId]);
+    return this.mapEntry(rows[0], tagMap);
+  }
+
   async findMostRecentBySourceUrlForUser(
     userId: string,
     sourceUrl: string,
@@ -288,6 +317,7 @@ export class KnowledgeRepository {
         filePath: updates.filePath,
         metadata: updates.metadata,
         summary: updates.summary,
+        lastError: updates.lastError,
         status: updates.status,
         archivedAt: updates.archivedAt,
         updatedAt: new Date(),
@@ -329,6 +359,134 @@ export class KnowledgeRepository {
         updatedAt: new Date(),
       })
       .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
+  }
+
+  async updateStatus(entryId: string, userId: string, status: KnowledgeEntryStatus): Promise<void> {
+    await this.db
+      .update(knowledgeEntries)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
+  }
+
+  async updateStatusWithError(
+    entryId: string,
+    userId: string,
+    status: 'FAILED',
+    lastError: string,
+  ): Promise<void> {
+    await this.db
+      .update(knowledgeEntries)
+      .set({
+        status,
+        lastError,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
+  }
+
+  async clearLastError(entryId: string, userId: string): Promise<void> {
+    await this.db
+      .update(knowledgeEntries)
+      .set({
+        lastError: null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
+  }
+
+  async updateSummary(entryId: string, summary: string | null): Promise<void> {
+    await this.db
+      .update(knowledgeEntries)
+      .set({
+        summary,
+        updatedAt: new Date(),
+      })
+      .where(eq(knowledgeEntries.id, entryId));
+  }
+
+  async deleteChunksByEntryId(entryId: string): Promise<void> {
+    await this.db.delete(contentChunks).where(eq(contentChunks.entryId, entryId));
+  }
+
+  async insertChunksBatch(chunks: ContentChunkRecord[]): Promise<void> {
+    if (chunks.length === 0) {
+      return;
+    }
+
+    await this.db
+      .insert(contentChunks)
+      .values(
+        chunks.map((chunk) => ({
+          id: chunk.id,
+          entryId: chunk.entryId,
+          chunkIndex: chunk.chunkIndex,
+          content: chunk.content,
+          tokenCount: chunk.tokenCount,
+          embedding: chunk.embedding ? JSON.stringify(chunk.embedding) : null,
+          embeddingModel: chunk.embeddingModel ?? null,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [contentChunks.entryId, contentChunks.chunkIndex],
+        set: {
+          content: sql`excluded.content`,
+          tokenCount: sql`excluded.token_count`,
+          embedding: sql`excluded.embedding`,
+          embeddingModel: sql`excluded.embedding_model`,
+        },
+      });
+  }
+
+  async getUserSettingsForIndexing(userId: string): Promise<{
+    language: string;
+    aiProvider: AIProvider;
+    aiModel: string;
+    privacyMode: boolean;
+  }> {
+    const rows = await this.db
+      .select({
+        language: userSettings.language,
+        aiProvider: userSettings.aiProvider,
+        aiModel: userSettings.aiModel,
+        privacyMode: userSettings.privacyMode,
+      })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+    const fallback = {
+      language: 'pt-BR',
+      aiProvider: 'ollama' as const,
+      aiModel: 'llama3.1',
+      privacyMode: true,
+    };
+    if (rows.length === 0) {
+      return fallback;
+    }
+    return {
+      language: rows[0].language,
+      aiProvider: rows[0].aiProvider as AIProvider,
+      aiModel: rows[0].aiModel,
+      privacyMode: rows[0].privacyMode,
+    };
+  }
+
+  async getPendingEntriesForDrain(): Promise<Array<{ entryId: string; userId: string }>> {
+    const rows = await this.db
+      .select({
+        entryId: knowledgeEntries.id,
+        userId: knowledgeEntries.userId,
+      })
+      .from(knowledgeEntries)
+      .where(
+        and(eq(knowledgeEntries.status, 'PENDING'), sql`${knowledgeEntries.content} IS NOT NULL`),
+      )
+      .orderBy(desc(knowledgeEntries.updatedAt))
+      .limit(500);
+
+    return rows;
   }
 
   async createMaintenanceJob(input: CreateMaintenanceJobInput): Promise<string> {

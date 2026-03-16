@@ -40,6 +40,7 @@ export interface KnowledgeEntryResponse {
   filePath?: string;
   metadata?: EntryMetadata;
   summary: string | null;
+  lastError: string | null;
   status: KnowledgeEntryStatus;
   tags: string[];
   createdAt: string;
@@ -70,7 +71,7 @@ export interface KnowledgeEntryListResponse {
 export interface KnowledgeEntryReindexAcceptedResponse {
   entryId: string;
   jobId: string;
-  status: 'PENDING_STUB';
+  status: 'QUEUED';
 }
 
 export interface KnowledgeEntryListQuery {

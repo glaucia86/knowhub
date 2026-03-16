@@ -232,8 +232,8 @@ describe('KnowledgeService lifecycle transitions', () => {
     assert.equal(markedPending, true);
     assert.equal(reindexEntryId, 'entry-5');
     assert.equal(clearedSummary, null);
-    assert.equal(response.jobId, 'job-77');
-    assert.equal(response.status, 'PENDING_STUB');
+    assert.equal(response.jobId, 'indexing-entry-5');
+    assert.equal(response.status, 'QUEUED');
   });
 
   it('rejects updates while an entry is indexing', async () => {

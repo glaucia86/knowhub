@@ -607,4 +607,162 @@ describe('KnowledgeService create rules', () => {
     assert.equal((emittedEvent as { type: string }).type, 'NOTE');
     assert.ok((emittedEvent as { entryId?: string }).entryId);
   });
+
+  it('emits reindex request directly when listeners are registered', async () => {
+    let emittedEventName: string | undefined;
+    let emittedPayload: unknown;
+    let updatedStatus: string | undefined;
+    const repository = {
+      async getEntryByIdForUser() {
+        return buildEntry({ id: 'entry-reindex', status: 'INDEXED' });
+      },
+      async updateEntry(
+        _userId: string,
+        _entryId: string,
+        updates: { status?: string; summary?: string | null; lastError?: string | null },
+      ) {
+        updatedStatus = updates.status;
+      },
+    };
+    const service = createService(repository, {
+      eventEmitter: {
+        listenerCount: () => 1,
+        emit: (eventName: string, payload: unknown) => {
+          emittedEventName = eventName;
+          emittedPayload = payload;
+          return true;
+        },
+      } as unknown as EventEmitter2,
+      outbox: {
+        enqueueEvent: async () => 'job-1',
+        enqueueReindex: async () => {
+          throw new Error('should not enqueue reindex');
+        },
+      },
+    });
+
+    const result = await service.reindexEntry('user-1', 'entry-reindex');
+
+    assert.equal(updatedStatus, 'PENDING');
+    assert.equal(result.status, 'QUEUED');
+    assert.equal(result.jobId, 'indexing-entry-reindex');
+    assert.equal(emittedEventName, 'entry.reindex-requested');
+    assert.deepEqual(emittedPayload, { entryId: 'entry-reindex', userId: 'user-1' });
+  });
+
+  it('finalizes ingested URL entries and re-queues indexing when active', async () => {
+    let updatedTitle: string | undefined;
+    let updatedStatus: string | undefined;
+    let queuedEvent: string | undefined;
+    const repository = {
+      async getEntryByIdForUser() {
+        return buildEntry({
+          id: 'entry-url',
+          type: 'LINK',
+          status: 'INDEXED',
+          sourceUrl: 'https://old.example',
+          content: 'old',
+        });
+      },
+      async updateEntry(
+        _userId: string,
+        _entryId: string,
+        updates: { title?: string; status?: string },
+      ) {
+        updatedTitle = updates.title;
+        updatedStatus = updates.status;
+      },
+    };
+    const service = createService(repository, {
+      outbox: {
+        enqueueEvent: async (input: { eventName: string }) => {
+          queuedEvent = input.eventName;
+          return 'job-11';
+        },
+        enqueueReindex: async () => 'job-12',
+      },
+    });
+
+    await service.finalizeIngestedUrlEntry({
+      userId: 'user-1',
+      entryId: 'entry-url',
+      sourceUrl: 'https://new.example',
+      title: 'New title',
+      content: 'new content',
+      metadata: { ogTitle: 'ignored' },
+    });
+
+    assert.equal(updatedTitle, 'New title');
+    assert.equal(updatedStatus, 'PENDING');
+    assert.equal(queuedEvent, 'entry.updated.content');
+  });
+
+  it('skips finalize for archived ingested URL entries', async () => {
+    let updateCalls = 0;
+    const repository = {
+      async getEntryByIdForUser() {
+        return buildEntry({
+          id: 'entry-archived-url',
+          type: 'LINK',
+          status: 'ARCHIVED',
+          archivedAt: new Date('2026-03-08T00:10:00.000Z'),
+        });
+      },
+      async updateEntry() {
+        updateCalls += 1;
+      },
+    };
+    const service = createService(repository, {
+      outbox: {
+        enqueueEvent: async () => {
+          throw new Error('should not enqueue');
+        },
+        enqueueReindex: async () => 'job-1',
+      },
+    });
+
+    await service.finalizeIngestedUrlEntry({
+      userId: 'user-1',
+      entryId: 'entry-archived-url',
+      sourceUrl: 'https://new.example',
+      title: 'New title',
+      content: 'new content',
+    });
+
+    assert.equal(updateCalls, 0);
+  });
+
+  it('maps findBySourceUrl and delegates markEntryFailed to repository', async () => {
+    let failedReason: string | undefined;
+    const repository = {
+      async findMostRecentBySourceUrlForUser(_userId: string, sourceUrl: string) {
+        if (sourceUrl === 'https://missing.example') {
+          return null;
+        }
+        return buildEntry({
+          id: 'entry-found',
+          sourceUrl: 'https://docs.example',
+          content: 'abc',
+        });
+      },
+      async updateStatusWithError(
+        _entryId: string,
+        _userId: string,
+        _status: 'FAILED',
+        reason: string,
+      ) {
+        failedReason = reason;
+      },
+    };
+    const service = createService(repository);
+
+    const found = await service.findBySourceUrl('user-1', 'https://docs.example');
+    const missing = await service.findBySourceUrl('user-1', 'https://missing.example');
+    await service.markEntryFailed('user-1', 'entry-found', 'boom');
+
+    assert.equal(found?.id, 'entry-found');
+    assert.equal(found?.contentSizeBytes, 3);
+    assert.equal(missing, null);
+    assert.equal(failedReason, 'boom');
+  });
 });
