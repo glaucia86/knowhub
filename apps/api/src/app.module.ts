@@ -10,6 +10,8 @@ import { HealthModule } from './modules/health/health.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { IngestionModule } from './modules/ingestion/ingestion.module';
+import { IndexingModule } from './modules/agents/indexing/indexing.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 function isDevEnvironmentModuleEnabled(): boolean {
   const flag = process.env.ENABLE_DEV_ENV_ENDPOINTS;
@@ -30,6 +32,8 @@ function isDevEnvironmentModuleEnabled(): boolean {
     SettingsModule,
     KnowledgeModule,
     IngestionModule,
+    IndexingModule,
+    AdminModule,
     ...(isDevEnvironmentModuleEnabled() ? [DevEnvironmentModule] : []),
   ],
   controllers: [SharedAssetsController, QualityGatesController],

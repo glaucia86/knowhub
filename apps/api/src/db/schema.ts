@@ -57,6 +57,7 @@ export const knowledgeEntries = sqliteTable(
     filePath: text('file_path'),
     metadata: text('metadata', { mode: 'json' }).$type<EntryMetadata | null>(),
     summary: text('summary'),
+    lastError: text('last_error'),
     status: text('status', {
       enum: ['PENDING', 'INDEXING', 'INDEXED', 'ARCHIVED', 'FAILED'],
     }).notNull(),
@@ -172,3 +173,23 @@ export const maintenanceJobs = sqliteTable('maintenance_jobs', {
     .default(sql`(unixepoch() * 1000)`),
   completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
 });
+
+export const indexingCheckpoints = sqliteTable(
+  'indexing_checkpoints',
+  {
+    id: text('id').primaryKey(),
+    entryId: text('entry_id')
+      .notNull()
+      .references(() => knowledgeEntries.id, { onDelete: 'cascade' }),
+    threadId: text('thread_id').notNull().unique(),
+    checkpoint: text('checkpoint').notNull(),
+    step: text('step').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (table) => [uniqueIndex('ux_checkpoint_entry').on(table.entryId)],
+);

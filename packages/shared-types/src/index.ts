@@ -7,3 +7,4 @@ export * from './settings.types';
 export * from './knowledge.types';
 export * from './events.types';
 export * from './ingestion.types';
+export * from './agents.types';

@@ -43,6 +43,9 @@ export class KnowledgeEntryResponseDto {
   @ApiProperty({ nullable: true })
   summary!: string | null;
 
+  @ApiProperty({ nullable: true })
+  lastError!: string | null;
+
   @ApiProperty({ enum: ['PENDING', 'INDEXING', 'INDEXED', 'ARCHIVED', 'FAILED'] })
   status!: 'PENDING' | 'INDEXING' | 'INDEXED' | 'ARCHIVED' | 'FAILED';
 
@@ -98,6 +101,6 @@ export class KnowledgeEntryReindexAcceptedResponseDto {
   @ApiProperty()
   jobId!: string;
 
-  @ApiProperty({ enum: ['PENDING_STUB'] })
-  status!: 'PENDING_STUB';
+  @ApiProperty({ enum: ['QUEUED'] })
+  status!: 'QUEUED';
 }

@@ -27,7 +27,7 @@ export class IndexingOutboxService {
     });
   }
 
-  async enqueueReindex(input: { entryId: string; userId: string }): Promise<string> {
+  async enqueueReindex(input: { entryId: string; userId: string; jobId: string }): Promise<string> {
     return this.knowledgeRepository.createMaintenanceJob({
       type: 'REINDEX',
       status: 'PENDING_STUB',
@@ -37,6 +37,7 @@ export class IndexingOutboxService {
         action: 'REINDEX',
         entryId: input.entryId,
         userId: input.userId,
+        jobId: input.jobId,
       },
     });
   }

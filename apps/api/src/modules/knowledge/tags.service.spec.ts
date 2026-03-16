@@ -76,4 +76,52 @@ describe('TagsService', () => {
     assert.deepEqual(deletedAssociations, [{ entryId: 'entry-1', tagId: 'tag-1' }]);
     assert.equal(insertAssociationCalls, 0);
   });
+
+  it('returns early for empty suggested tags', async () => {
+    let findTagsCalls = 0;
+    const service = new TagsService(
+      createRepositoryMock({
+        findTagsByUserId: async () => {
+          findTagsCalls += 1;
+          return [];
+        },
+      }),
+    );
+
+    await service.syncSuggestedTags('entry-1', 'user-1', []);
+
+    assert.equal(findTagsCalls, 0);
+  });
+
+  it('creates and associates only missing suggested tags', async () => {
+    const insertedTags: Array<{ userId: string; name: string }> = [];
+    const insertedAssociations: Array<{ entryId: string; tagIds: string[] }> = [];
+    let findTagsCalls = 0;
+    const service = new TagsService(
+      createRepositoryMock({
+        findTagsByUserId: async () => {
+          findTagsCalls += 1;
+          if (findTagsCalls === 1) {
+            return [{ id: 'tag-1', userId: 'user-1', name: 'nestjs' }];
+          }
+          return [
+            { id: 'tag-1', userId: 'user-1', name: 'nestjs' },
+            { id: 'tag-2', userId: 'user-1', name: 'queue' },
+          ];
+        },
+        insertTag: async (userId: string, name: string) => {
+          insertedTags.push({ userId, name });
+        },
+        findAssociationsByEntryId: async () => [{ entryId: 'entry-1', tagId: 'tag-1' }],
+        insertAssociations: async (entryId: string, tagIds: string[]) => {
+          insertedAssociations.push({ entryId, tagIds });
+        },
+      }),
+    );
+
+    await service.syncSuggestedTags('entry-1', 'user-1', ['NestJS', 'queue']);
+
+    assert.deepEqual(insertedTags, [{ userId: 'user-1', name: 'queue' }]);
+    assert.deepEqual(insertedAssociations, [{ entryId: 'entry-1', tagIds: ['tag-2'] }]);
+  });
 });

@@ -227,13 +227,20 @@ describe('KnowledgeService lifecycle transitions', () => {
       enqueueReindex: async () => 'job-77',
     });
 
-    const response = await service.reindexEntry('user-1', 'entry-5');
+    const originalNow = Date.now;
+    Date.now = () => 1_710_000_000_001;
+    let response: Awaited<ReturnType<KnowledgeService['reindexEntry']>>;
+    try {
+      response = await service.reindexEntry('user-1', 'entry-5');
+    } finally {
+      Date.now = originalNow;
+    }
 
     assert.equal(markedPending, true);
     assert.equal(reindexEntryId, 'entry-5');
     assert.equal(clearedSummary, null);
-    assert.equal(response.jobId, 'job-77');
-    assert.equal(response.status, 'PENDING_STUB');
+    assert.equal(response.jobId, 'indexing-entry-5-1710000000001');
+    assert.equal(response.status, 'QUEUED');
   });
 
   it('rejects updates while an entry is indexing', async () => {

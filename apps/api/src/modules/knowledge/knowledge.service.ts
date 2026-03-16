@@ -10,6 +10,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import type {
   EntryMetadata,
   EntryCreatedEvent,
+  EntryReindexRequestedEvent,
   EntryUpdatedContentEvent,
   KnowledgeEntryDetailEnvelopeResponse,
   KnowledgeEntryEnvelopeResponse,
@@ -34,6 +35,7 @@ import { TagsService } from './tags.service';
 import { KNOWLEDGE_EVENT_NAMES as KNOWLEDGE_EVENT_NAMES_CONST } from '@knowhub/shared-types';
 import { PaginationHelper } from '../shared/pagination-helper.service';
 import { TitleGeneratorService } from '../shared/title-generator.service';
+import { buildIndexingJobId } from '../agents/indexing/indexing.queue';
 
 @Injectable()
 export class KnowledgeService {
@@ -149,6 +151,7 @@ export class KnowledgeService {
       filePath: entry.filePath ?? undefined,
       metadata: entry.metadata ?? undefined,
       summary: entry.summary,
+      lastError: entry.lastError ?? null,
       status: entry.status,
       tags: entry.tags,
       createdAt: entry.createdAt.toISOString(),
@@ -436,10 +439,7 @@ export class KnowledgeService {
   }
 
   async markEntryFailed(userId: string, entryId: string, reason: string): Promise<void> {
-    await this.knowledgeRepository.updateEntry(userId, entryId, {
-      status: 'FAILED',
-      summary: reason,
-    });
+    await this.knowledgeRepository.updateStatusWithError(entryId, userId, 'FAILED', reason);
   }
 
   async reindexEntry(
@@ -459,12 +459,19 @@ export class KnowledgeService {
     await this.knowledgeRepository.updateEntry(userId, entryId, {
       status: 'PENDING',
       summary: null,
+      lastError: null,
     });
-    const jobId = await this.indexingOutboxService.enqueueReindex({ entryId, userId });
+    const jobId = buildIndexingJobId(entryId, Date.now().toString());
+    if (this.eventEmitter.listenerCount(KNOWLEDGE_EVENT_NAMES_CONST.entryReindexRequested) > 0) {
+      const event: EntryReindexRequestedEvent = { entryId, userId, jobId };
+      this.eventEmitter.emit(KNOWLEDGE_EVENT_NAMES_CONST.entryReindexRequested, event);
+    } else {
+      await this.indexingOutboxService.enqueueReindex({ entryId, userId, jobId });
+    }
     return {
       entryId,
       jobId,
-      status: 'PENDING_STUB',
+      status: 'QUEUED',
     };
   }
 }
