@@ -13,7 +13,7 @@ export function createEmbeddingNode(deps: { embeddingService: EmbeddingService }
 
     const embeddings = await deps.embeddingService.embedBatch({
       provider: state.aiProvider,
-      model: state.aiModel,
+      model: state.embeddingModel,
       texts: state.chunks,
     });
 

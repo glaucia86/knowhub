@@ -9,6 +9,7 @@ export interface IndexingJobPayload {
   language: string;
   aiProvider: AIProvider;
   aiModel: string;
+  embeddingModel: string;
   privacyMode: boolean;
 }
 

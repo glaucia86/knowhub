@@ -8,6 +8,12 @@ export function createLoaderNode(deps: { repo: KnowledgeRepository }) {
     if (!entry) {
       throw new IndexingPermanentError('CONTENT_NOT_AVAILABLE: entry not found', 'LOAD');
     }
+    if (entry.userId !== state.userId) {
+      throw new IndexingPermanentError(
+        `CONTENT_NOT_AVAILABLE: entry ${state.entryId} does not belong to user ${state.userId}`,
+        'LOAD',
+      );
+    }
 
     const content = entry.content;
     if (!content || content.trim().length === 0) {

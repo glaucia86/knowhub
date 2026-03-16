@@ -27,7 +27,7 @@ export class IndexingService implements OnModuleInit, OnModuleDestroy {
   };
 
   private readonly onReindexRequested = (event: EntryReindexRequestedEvent) => {
-    void this.reindex(event.entryId, event.userId);
+    void this.enqueueReindexFromEvent(event);
   };
 
   constructor(
@@ -73,6 +73,7 @@ export class IndexingService implements OnModuleInit, OnModuleDestroy {
     userId: string,
     triggeredBy: IndexingJobPayload['triggeredBy'],
     priority?: number,
+    forcedJobId?: string,
   ): Promise<string | null> {
     const queue = this.ensureQueue();
     if (!queue) {
@@ -94,13 +95,15 @@ export class IndexingService implements OnModuleInit, OnModuleDestroy {
       language: settings.language,
       aiProvider: settings.aiProvider,
       aiModel: settings.aiModel,
+      embeddingModel: settings.embeddingModel,
       privacyMode: settings.privacyMode,
     };
 
     const jobId =
-      triggeredBy === 'manual-reindex'
+      forcedJobId ??
+      (triggeredBy === 'manual-reindex'
         ? buildIndexingJobId(entryId, Date.now().toString())
-        : buildIndexingJobId(entryId);
+        : buildIndexingJobId(entryId));
 
     if (triggeredBy !== 'manual-reindex') {
       const existingJob = await queue.getJob(jobId);
@@ -123,9 +126,19 @@ export class IndexingService implements OnModuleInit, OnModuleDestroy {
     return job.id ?? null;
   }
 
-  async reindex(entryId: string, userId: string): Promise<string | null> {
+  async reindex(entryId: string, userId: string, jobId?: string): Promise<string | null> {
     await this.knowledgeRepository.clearLastError(entryId, userId);
-    return this.enqueueIndexing(entryId, userId, 'manual-reindex', 1);
+    return this.enqueueIndexing(entryId, userId, 'manual-reindex', 1, jobId);
+  }
+
+  private async enqueueReindexFromEvent(event: EntryReindexRequestedEvent): Promise<void> {
+    try {
+      await this.reindex(event.entryId, event.userId, event.jobId);
+    } catch (error) {
+      this.logger.error(
+        `Failed to enqueue reindex for ${event.entryId}: ${(error as Error).message}`,
+      );
+    }
   }
 
   emitProgress(event: IndexingProgressEvent): void {
@@ -148,14 +161,59 @@ export class IndexingService implements OnModuleInit, OnModuleDestroy {
   private async drainPendingStubs(): Promise<void> {
     try {
       const pendingEntries = await this.knowledgeRepository.getPendingEntriesForDrain();
+      if (pendingEntries.length === 0) {
+        return;
+      }
+
+      const queue = this.ensureQueue();
+      if (!queue) {
+        this.logger.warn(
+          `Indexing queue unavailable; skipping drain of ${pendingEntries.length} pending entries`,
+        );
+        return;
+      }
+
       for (const entry of pendingEntries) {
         await this.enqueueIndexing(entry.entryId, entry.userId, 'entry.created');
       }
-      if (pendingEntries.length > 0) {
-        this.logger.log(`Drained ${pendingEntries.length} pending entries to indexing queue`);
-      }
+      this.logger.log(`Drained ${pendingEntries.length} pending entries to indexing queue`);
     } catch (error) {
       this.logger.warn(`Pending drain failed: ${(error as Error).message}`);
+    }
+
+    try {
+      const pendingReindexJobs = await this.knowledgeRepository.getPendingReindexMaintenanceJobs();
+      for (const job of pendingReindexJobs) {
+        const claimed = await this.knowledgeRepository.markMaintenanceJobRunning(job.id);
+        if (!claimed) {
+          continue;
+        }
+
+        try {
+          const queuedJobId = await this.enqueueIndexing(
+            job.entryId,
+            job.userId,
+            'manual-reindex',
+            1,
+            job.requestedJobId,
+          );
+          await this.knowledgeRepository.completeMaintenanceJob(job.id, {
+            queuedJobId,
+            requestedJobId: job.requestedJobId ?? null,
+          });
+        } catch (error) {
+          await this.knowledgeRepository.failMaintenanceJob(job.id, (error as Error).message);
+          this.logger.error(
+            `Failed to drain reindex maintenance job ${job.id}: ${(error as Error).message}`,
+          );
+        }
+      }
+
+      if (pendingReindexJobs.length > 0) {
+        this.logger.log(`Drained ${pendingReindexJobs.length} reindex maintenance jobs`);
+      }
+    } catch (error) {
+      this.logger.warn(`Reindex maintenance drain failed: ${(error as Error).message}`);
     }
   }
 

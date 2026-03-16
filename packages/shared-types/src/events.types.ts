@@ -23,6 +23,7 @@ export interface EntryUpdatedContentEvent {
 export interface EntryReindexRequestedEvent {
   entryId: string;
   userId: string;
+  jobId?: string;
 }
 
 export const INDEXING_EVENT_NAMES = {

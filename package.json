@@ -60,9 +60,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "npm@11.7.0",
-  "dependencies": {
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.15.1"
-  }
+  "packageManager": "npm@11.7.0"
 }

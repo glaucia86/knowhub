@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, ne, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, ne, or, sql, type SQL } from 'drizzle-orm';
 import type {
   AIProvider,
   EntryMetadata,
@@ -15,6 +15,7 @@ import {
   contentChunks,
   userSettings,
   entryTags,
+  indexingCheckpoints,
   knowledgeEntries,
   maintenanceJobs,
   tags,
@@ -87,6 +88,13 @@ export interface CreateMaintenanceJobInput {
   entryId?: string;
   payload?: Record<string, unknown>;
   result?: Record<string, unknown> | null;
+}
+
+export interface PendingReindexMaintenanceJobRecord {
+  id: string;
+  entryId: string;
+  userId: string;
+  requestedJobId?: string;
 }
 
 export interface KnowledgeListFilters {
@@ -371,6 +379,51 @@ export class KnowledgeRepository {
       .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
   }
 
+  async updateStatusIfNotArchived(
+    entryId: string,
+    userId: string,
+    status: KnowledgeEntryStatus,
+  ): Promise<boolean> {
+    const result = await this.db
+      .update(knowledgeEntries)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(knowledgeEntries.id, entryId),
+          eq(knowledgeEntries.userId, userId),
+          ne(knowledgeEntries.status, 'ARCHIVED'),
+        ),
+      );
+
+    return (result.changes ?? 0) > 0;
+  }
+
+  async updateStatusIfCurrent(
+    entryId: string,
+    userId: string,
+    currentStatus: KnowledgeEntryStatus,
+    nextStatus: KnowledgeEntryStatus,
+  ): Promise<boolean> {
+    const result = await this.db
+      .update(knowledgeEntries)
+      .set({
+        status: nextStatus,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(knowledgeEntries.id, entryId),
+          eq(knowledgeEntries.userId, userId),
+          eq(knowledgeEntries.status, currentStatus),
+        ),
+      );
+
+    return (result.changes ?? 0) > 0;
+  }
+
   async updateStatusWithError(
     entryId: string,
     userId: string,
@@ -387,6 +440,30 @@ export class KnowledgeRepository {
       .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
   }
 
+  async updateStatusWithErrorIfCurrent(
+    entryId: string,
+    userId: string,
+    currentStatus: KnowledgeEntryStatus,
+    lastError: string,
+  ): Promise<boolean> {
+    const result = await this.db
+      .update(knowledgeEntries)
+      .set({
+        status: 'FAILED',
+        lastError,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(knowledgeEntries.id, entryId),
+          eq(knowledgeEntries.userId, userId),
+          eq(knowledgeEntries.status, currentStatus),
+        ),
+      );
+
+    return (result.changes ?? 0) > 0;
+  }
+
   async clearLastError(entryId: string, userId: string): Promise<void> {
     await this.db
       .update(knowledgeEntries)
@@ -397,18 +474,31 @@ export class KnowledgeRepository {
       .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
   }
 
-  async updateSummary(entryId: string, summary: string | null): Promise<void> {
+  async updateSummary(entryId: string, userId: string, summary: string | null): Promise<void> {
     await this.db
       .update(knowledgeEntries)
       .set({
         summary,
         updatedAt: new Date(),
       })
-      .where(eq(knowledgeEntries.id, entryId));
+      .where(and(eq(knowledgeEntries.id, entryId), eq(knowledgeEntries.userId, userId)));
   }
 
-  async deleteChunksByEntryId(entryId: string): Promise<void> {
-    await this.db.delete(contentChunks).where(eq(contentChunks.entryId, entryId));
+  async deleteChunksByEntryId(entryId: string, userId: string): Promise<void> {
+    await this.db
+      .delete(contentChunks)
+      .where(
+        and(
+          eq(contentChunks.entryId, entryId),
+          inArray(
+            contentChunks.entryId,
+            this.db
+              .select({ id: knowledgeEntries.id })
+              .from(knowledgeEntries)
+              .where(eq(knowledgeEntries.userId, userId)),
+          ),
+        ),
+      );
   }
 
   async insertChunksBatch(chunks: ContentChunkRecord[]): Promise<void> {
@@ -444,6 +534,7 @@ export class KnowledgeRepository {
     language: string;
     aiProvider: AIProvider;
     aiModel: string;
+    embeddingModel: string;
     privacyMode: boolean;
   }> {
     const rows = await this.db
@@ -451,6 +542,7 @@ export class KnowledgeRepository {
         language: userSettings.language,
         aiProvider: userSettings.aiProvider,
         aiModel: userSettings.aiModel,
+        embeddingModel: userSettings.embeddingModel,
         privacyMode: userSettings.privacyMode,
       })
       .from(userSettings)
@@ -460,6 +552,7 @@ export class KnowledgeRepository {
       language: 'pt-BR',
       aiProvider: 'ollama' as const,
       aiModel: 'llama3.1',
+      embeddingModel: 'nomic-embed-text',
       privacyMode: true,
     };
     if (rows.length === 0) {
@@ -469,6 +562,7 @@ export class KnowledgeRepository {
       language: rows[0].language,
       aiProvider: rows[0].aiProvider as AIProvider,
       aiModel: rows[0].aiModel,
+      embeddingModel: rows[0].embeddingModel,
       privacyMode: rows[0].privacyMode,
     };
   }
@@ -503,5 +597,106 @@ export class KnowledgeRepository {
       completedAt: null,
     });
     return jobId;
+  }
+
+  async getPendingReindexMaintenanceJobs(
+    limit = 200,
+  ): Promise<PendingReindexMaintenanceJobRecord[]> {
+    const rows = await this.db
+      .select({
+        id: maintenanceJobs.id,
+        entryId: maintenanceJobs.entryId,
+        userId: maintenanceJobs.userId,
+        payload: maintenanceJobs.payload,
+      })
+      .from(maintenanceJobs)
+      .where(and(eq(maintenanceJobs.type, 'REINDEX'), eq(maintenanceJobs.status, 'PENDING_STUB')))
+      .orderBy(asc(maintenanceJobs.createdAt))
+      .limit(limit);
+
+    return rows
+      .filter((row) => row.entryId && row.userId)
+      .map((row) => {
+        let requestedJobId: string | undefined;
+        if (row.payload) {
+          try {
+            const parsed = JSON.parse(row.payload) as { jobId?: unknown };
+            if (typeof parsed.jobId === 'string' && parsed.jobId.length > 0) {
+              requestedJobId = parsed.jobId;
+            }
+          } catch {
+            requestedJobId = undefined;
+          }
+        }
+        return {
+          id: row.id,
+          entryId: row.entryId as string,
+          userId: row.userId as string,
+          requestedJobId,
+        };
+      });
+  }
+
+  async markMaintenanceJobRunning(jobId: string): Promise<boolean> {
+    const result = await this.db
+      .update(maintenanceJobs)
+      .set({
+        status: 'running',
+      })
+      .where(and(eq(maintenanceJobs.id, jobId), eq(maintenanceJobs.status, 'PENDING_STUB')));
+    return (result.changes ?? 0) > 0;
+  }
+
+  async completeMaintenanceJob(
+    jobId: string,
+    resultPayload?: Record<string, unknown>,
+  ): Promise<void> {
+    await this.db
+      .update(maintenanceJobs)
+      .set({
+        status: 'completed',
+        result: resultPayload ? JSON.stringify(resultPayload) : null,
+        completedAt: new Date(),
+      })
+      .where(eq(maintenanceJobs.id, jobId));
+  }
+
+  async failMaintenanceJob(jobId: string, reason: string): Promise<void> {
+    await this.db
+      .update(maintenanceJobs)
+      .set({
+        status: 'failed',
+        result: JSON.stringify({ error: reason }),
+        completedAt: new Date(),
+      })
+      .where(eq(maintenanceJobs.id, jobId));
+  }
+
+  async saveIndexingCheckpoint(
+    entryId: string,
+    threadId: string,
+    step: string,
+    checkpoint: Record<string, unknown>,
+  ): Promise<void> {
+    await this.db
+      .insert(indexingCheckpoints)
+      .values({
+        id: randomUUID(),
+        entryId,
+        threadId,
+        step,
+        checkpoint: JSON.stringify(checkpoint),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: indexingCheckpoints.entryId,
+        set: {
+          threadId,
+          step,
+          checkpoint: JSON.stringify(checkpoint),
+          updatedAt: new Date(),
+        },
+      });
   }
 }

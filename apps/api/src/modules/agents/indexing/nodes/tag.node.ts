@@ -23,7 +23,6 @@ const STOP_WORDS = new Set([
   'das',
   'que',
   'uma',
-  'para',
   'por',
   'and',
   'the',

@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   Injectable,
+  OnModuleDestroy,
   Param,
   UseGuards,
 } from '@nestjs/common';
@@ -28,12 +29,28 @@ export class LocalOnlyGuard implements CanActivate {
 
 @Controller('admin/queues')
 @UseGuards(LocalOnlyGuard)
-export class AdminQueuesController {
-  private readonly queue = new Queue(INDEXING_QUEUE, { connection: resolveRedisConnection() });
+export class AdminQueuesController implements OnModuleDestroy {
+  private queue: Queue | null = null;
+
+  private ensureQueue(): Queue {
+    if (this.queue) {
+      return this.queue;
+    }
+    this.queue = new Queue(INDEXING_QUEUE, { connection: resolveRedisConnection() });
+    return this.queue;
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    if (this.queue) {
+      await this.queue.close();
+      this.queue = null;
+    }
+  }
 
   @Get()
   async getQueues() {
-    const counts = await this.queue.getJobCounts(
+    const queue = this.ensureQueue();
+    const counts = await queue.getJobCounts(
       'waiting',
       'active',
       'completed',
@@ -56,7 +73,8 @@ export class AdminQueuesController {
     if (queueName !== INDEXING_QUEUE) {
       return { data: [] };
     }
-    const jobs = await this.queue.getJobs(['failed'], 0, 50, true);
+    const queue = this.ensureQueue();
+    const jobs = await queue.getJobs(['failed'], 0, 50, true);
     return {
       data: jobs.map((job) => ({
         id: job.id,

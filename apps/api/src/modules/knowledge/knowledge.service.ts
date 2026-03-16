@@ -461,16 +461,16 @@ export class KnowledgeService {
       summary: null,
       lastError: null,
     });
-    const fallbackJobId = buildIndexingJobId(entryId);
+    const jobId = buildIndexingJobId(entryId, Date.now().toString());
     if (this.eventEmitter.listenerCount(KNOWLEDGE_EVENT_NAMES_CONST.entryReindexRequested) > 0) {
-      const event: EntryReindexRequestedEvent = { entryId, userId };
+      const event: EntryReindexRequestedEvent = { entryId, userId, jobId };
       this.eventEmitter.emit(KNOWLEDGE_EVENT_NAMES_CONST.entryReindexRequested, event);
     } else {
-      await this.indexingOutboxService.enqueueReindex({ entryId, userId });
+      await this.indexingOutboxService.enqueueReindex({ entryId, userId, jobId });
     }
     return {
       entryId,
-      jobId: fallbackJobId,
+      jobId,
       status: 'QUEUED',
     };
   }

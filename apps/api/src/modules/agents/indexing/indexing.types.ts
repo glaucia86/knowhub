@@ -8,6 +8,7 @@ export interface IndexingState {
   language: string;
   aiProvider: AIProvider;
   aiModel: string;
+  embeddingModel: string;
   privacyMode: boolean;
   chunks: string[];
   embeddings: number[][];
@@ -24,6 +25,7 @@ export function createInitialState(input: {
   language: string;
   aiProvider: AIProvider;
   aiModel: string;
+  embeddingModel: string;
   privacyMode: boolean;
 }): IndexingState {
   return {
@@ -34,6 +36,7 @@ export function createInitialState(input: {
     language: input.language,
     aiProvider: input.aiProvider,
     aiModel: input.aiModel,
+    embeddingModel: input.embeddingModel,
     privacyMode: input.privacyMode,
     chunks: [],
     embeddings: [],

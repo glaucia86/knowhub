@@ -641,13 +641,24 @@ describe('KnowledgeService create rules', () => {
       },
     });
 
-    const result = await service.reindexEntry('user-1', 'entry-reindex');
+    const originalNow = Date.now;
+    Date.now = () => 1_710_000_000_000;
+    let result: Awaited<ReturnType<KnowledgeService['reindexEntry']>>;
+    try {
+      result = await service.reindexEntry('user-1', 'entry-reindex');
+    } finally {
+      Date.now = originalNow;
+    }
 
     assert.equal(updatedStatus, 'PENDING');
     assert.equal(result.status, 'QUEUED');
-    assert.equal(result.jobId, 'indexing-entry-reindex');
+    assert.equal(result.jobId, 'indexing-entry-reindex-1710000000000');
     assert.equal(emittedEventName, 'entry.reindex-requested');
-    assert.deepEqual(emittedPayload, { entryId: 'entry-reindex', userId: 'user-1' });
+    assert.deepEqual(emittedPayload, {
+      entryId: 'entry-reindex',
+      userId: 'user-1',
+      jobId: 'indexing-entry-reindex-1710000000000',
+    });
   });
 
   it('finalizes ingested URL entries and re-queues indexing when active', async () => {
