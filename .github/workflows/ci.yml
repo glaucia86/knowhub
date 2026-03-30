@@ -110,7 +110,7 @@ jobs:
         if: ${{ always() && env.CODECOV_TOKEN != '' && steps.coverage-check.outputs.has_coverage == 'true' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ env.CODECOV_TOKEN }}
           files: '**/coverage/lcov.info'
