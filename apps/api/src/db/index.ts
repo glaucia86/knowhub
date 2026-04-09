@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import path from 'node:path';
 
 function resolveApiWorkspaceRoot(): string {
@@ -10,19 +11,39 @@ function resolveApiWorkspaceRoot(): string {
 }
 
 export const API_WORKSPACE_ROOT = resolveApiWorkspaceRoot();
+const KNOWHUB_DATABASE_RELATIVE_PATH = path.join('.knowhub', 'data', 'knowhub.db');
 
-function resolveDatabasePathFromEnv(databaseUrl: string | undefined): string {
+export interface ResolveDatabasePathOptions {
+  apiWorkspaceRoot?: string;
+  homeDirectory?: string;
+}
+
+export function resolveDatabasePathFromEnv(
+  databaseUrl: string | undefined,
+  options: ResolveDatabasePathOptions = {},
+): string {
+  const apiWorkspaceRoot = options.apiWorkspaceRoot ?? API_WORKSPACE_ROOT;
+  const homeDirectory = options.homeDirectory ?? homedir();
+  const defaultDatabasePath = path.resolve(homeDirectory, KNOWHUB_DATABASE_RELATIVE_PATH);
+
   if (!databaseUrl || databaseUrl.trim().length === 0) {
-    return path.resolve(API_WORKSPACE_ROOT, 'local.db');
+    return defaultDatabasePath;
   }
 
   const normalized = databaseUrl.trim();
+  if (normalized === ':memory:') {
+    return normalized;
+  }
   const withoutFilePrefix = normalized.startsWith('file:') ? normalized.slice(5) : normalized;
-  if (path.isAbsolute(withoutFilePrefix)) {
-    return withoutFilePrefix;
+  const withExpandedHome =
+    withoutFilePrefix === '~' || withoutFilePrefix.startsWith('~/')
+      ? path.resolve(homeDirectory, withoutFilePrefix.slice(2))
+      : withoutFilePrefix;
+  if (path.isAbsolute(withExpandedHome)) {
+    return withExpandedHome;
   }
 
-  return path.resolve(API_WORKSPACE_ROOT, withoutFilePrefix);
+  return path.resolve(apiWorkspaceRoot, withExpandedHome);
 }
 
 export const LOCAL_DATABASE_PATH = resolveDatabasePathFromEnv(process.env.DATABASE_URL);

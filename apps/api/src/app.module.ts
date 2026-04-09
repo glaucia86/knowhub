@@ -5,6 +5,13 @@ import { SharedAssetsService } from './modules/shared-assets/shared-assets.servi
 import { QualityGatesController } from './modules/quality-gates/quality-gates.controller';
 import { QualityGatesService } from './modules/quality-gates/quality-gates.service';
 import { DevEnvironmentModule } from './modules/dev-environment/dev-environment.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { KnowledgeModule } from './modules/knowledge/knowledge.module';
+import { IngestionModule } from './modules/ingestion/ingestion.module';
+import { IndexingModule } from './modules/agents/indexing/indexing.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 function isDevEnvironmentModuleEnabled(): boolean {
   const flag = process.env.ENABLE_DEV_ENV_ENDPOINTS;
@@ -18,7 +25,17 @@ function isDevEnvironmentModuleEnabled(): boolean {
 }
 
 @Module({
-  imports: [ReadinessModule, ...(isDevEnvironmentModuleEnabled() ? [DevEnvironmentModule] : [])],
+  imports: [
+    ReadinessModule,
+    AuthModule,
+    HealthModule,
+    SettingsModule,
+    KnowledgeModule,
+    IngestionModule,
+    IndexingModule,
+    AdminModule,
+    ...(isDevEnvironmentModuleEnabled() ? [DevEnvironmentModule] : []),
+  ],
   controllers: [SharedAssetsController, QualityGatesController],
   providers: [SharedAssetsService, QualityGatesService],
 })

@@ -4,10 +4,13 @@
 
 - Install deps: `npm install`
 - Lint all workspaces: `npm run lint`
+- Test all workspaces: `npm run test`
 - Core build: `npm run build`
 - Full build: `npm run build:all`
 - Core dev: `npm run dev`
 - Web dev: `npm run dev:web`
+- API build only: `npm run build -w @knowhub/api`
+- DB (API): `npm run db:migrate` · `npm run db:seed` · `npm run db:reset`
 
 ## CI/CD and Repository Automation
 
@@ -31,6 +34,8 @@
 - Publicação:
   - release GitHub automática com notas geradas do histórico.
   - placeholder mantido para futura publicação do pacote CLI.
+- Estado atual:
+  - última tag estável: `v0.6.0`.
 
 ### Community operations
 
@@ -74,5 +79,20 @@ When this happens:
 
 ## CLI Checks
 
-- Build CLI: `npm run build -w @knowhub/cli`
+- Build CLI: `npm run build -w knowhub-ai`
 - Run CLI check: `node apps/cli/dist/index.js setup-check`
+
+## Knowledge Module Checks (EPIC-1.2)
+
+- API-focused validation path:
+  1. `npm run build -w @knowhub/api`
+  2. `npm run lint`
+- When changing contracts or migrations, validate cross-workspace impact (`@knowhub/shared-types`, `@knowhub/shared-utils`, `apps/api`).
+
+## Indexing Module Checks (EPIC-1.4)
+
+- Validate queue/indexing changes with:
+  1. `npm run build -w @knowhub/api`
+  2. `npm run lint`
+- For reindex flows, preserve `jobId` correlation between API response, event payload, and outbox drain.
+- For worker state transitions, never overwrite `ARCHIVED` entries and keep updates tenant-scoped (`entryId + userId`).

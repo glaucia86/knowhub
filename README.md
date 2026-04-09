@@ -14,7 +14,7 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/>
   </a>
   <a href="https://nodejs.org/">
-    <img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen" alt="Node.js 22+"/>
+    <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node.js 20+"/>
   </a>
   <a href="CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/>
@@ -36,6 +36,20 @@ powered by AI. It helps developers capture, organize, and retrieve knowledge
 from notes, links, PDFs, GitHub issues and more — with semantic search and
 AI-generated summaries that never leave your device.
 
+## Development Status
+
+- Current release: `v0.6.0`
+- Current phase: **Phase 1 - Core Features** (in progress)
+- Delivered in Phase 1:
+  - Auth + local setup (CLI onboarding, JWT, secure credential store)
+  - Knowledge Entry CRUD API (`NOTE`, `LINK`, `PDF`, `GITHUB`) with tags, lifecycle, reindex, and FTS search support
+  - Ingestion API foundation (`/ingest/text`, `/ingest/url`, `/ingest/file`) with validation, deduplication, and async URL processing
+  - Indexing pipeline foundation (worker + queue + progress events + checkpoint persistence + reindex drain)
+  - Web ingestion playground (`/ingest`) for endpoint validation and quick manual testing
+  - Responsive web landing page
+- In progress:
+  - End-to-end semantic retrieval + AI Q&A workflows in CLI/Web
+
 |                      🔒 Privacy First                      |                  🧠 Second Brain                   |                     💻 Dev-Focused                     |                 🌍 Open Source                 |
 | :--------------------------------------------------------: | :------------------------------------------------: | :----------------------------------------------------: | :--------------------------------------------: |
 | All AI runs locally via Ollama — zero cloud, zero tracking | Vector embeddings connect your notes automatically | CLI + REST API + Web UI — pick the interface that fits | MIT licensed, fully hackable, community-driven |
@@ -44,7 +58,13 @@ AI-generated summaries that never leave your device.
 
 ## Demo
 
-> 🚧 **Visual demos coming soon.** Here's a preview of the CLI experience:
+### Web UI
+
+<div align="center">
+  <img src="resources/home-page-v1.png" alt="KnowHub Landing Page" width="900"/>
+</div>
+
+### CLI Preview
 
 ```bash
 # Add a knowledge snippet
@@ -85,7 +105,7 @@ All components run locally. CLI and Web UI talk to the NestJS API, which stores 
 
 ### Prerequisites
 
-- [Node.js 22+](https://nodejs.org/)
+- [Node.js 20+](https://nodejs.org/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose plugin)
 - [Git](https://git-scm.com/)
 
@@ -109,7 +129,16 @@ docker compose up -d
 make ollama-pull
 # or: docker compose exec ollama ollama pull gemma3:4b
 
-# 6. Start development servers
+# 6. Build core packages
+npm run build
+
+# 7. Run one-command local setup (EPIC-1.1)
+# published package flow:
+# npx knowhub-ai setup
+# monorepo local flow:
+node apps/cli/dist/index.js setup --reset
+
+# 8. Start development servers
 npm run dev
 ```
 
@@ -124,6 +153,9 @@ Access the app at:
 >
 > **Windows + OneDrive:** `apps/web` may fail with `spawn EPERM`. Run
 > `npm run dev` for the core services and `npm run dev:web` separately.
+>
+> **Windows + local API auth tests:** if needed, start API with explicit DB:
+> `DATABASE_URL=file:C:/Users/<user>/.knowhub/data/knowhub.db`
 
 ### Database setup
 
@@ -137,6 +169,9 @@ Full reset (removes `apps/api/local.db`, re-runs migrations and seed):
 ```bash
 npm run db:reset
 ```
+
+Note: the CLI setup command provisions the user-facing local database at
+`~/.knowhub/data/knowhub.db`. The `db:*` scripts above are for workspace/dev DB workflows.
 
 ---
 
@@ -180,13 +215,51 @@ knowhub list --limit 10
 
 ---
 
+## API Reference
+
+Base URL: `http://localhost:3001/api/v1`
+
+### Knowledge Entries
+
+| Method   | Endpoint                      | Description                                                                    |
+| -------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `POST`   | `/knowledge`                  | Create an entry (`NOTE`, `LINK`, `PDF`, `GITHUB`)                              |
+| `GET`    | `/knowledge`                  | List entries — paginated, filterable by `type`, `status`, `tag`, full-text `q` |
+| `GET`    | `/knowledge/:entryId`         | Retrieve entry detail (chunk count, relation count)                            |
+| `PATCH`  | `/knowledge/:entryId`         | Update title, content, source URL, file path, or tags                          |
+| `DELETE` | `/knowledge/:entryId`         | Archive an entry (soft delete, recoverable)                                    |
+| `POST`   | `/knowledge/:entryId/reindex` | Request reindexing — accepts `INDEXED` / `FAILED` entries                      |
+
+### Ingestion
+
+| Method | Endpoint       | Description                                                                      |
+| ------ | -------------- | -------------------------------------------------------------------------------- |
+| `POST` | `/ingest/text` | Ingest free text and create a knowledge entry                                   |
+| `POST` | `/ingest/url`  | Ingest a public URL asynchronously (`?force=true` to bypass deduplication)      |
+| `POST` | `/ingest/file` | Ingest a file upload (`.txt`, `.md`, `.pdf`) with server-side validation checks |
+
+Full Swagger docs: `http://localhost:3001/api`
+
+**Entry lifecycle:** `PENDING` → `INDEXING` → `INDEXED` · soft-archived via `DELETE` → `ARCHIVED` · reindexable via `POST /:id/reindex`
+
+**Indexing reliability notes:** archived entries are protected from delayed job overwrites, reindex requests return a stable queue correlation `jobId`, and indexing writes are tenant-scoped.
+
+---
+
 ## Roadmap
 
 - **Phase 0 — Infrastructure** ✅ Monorepo, CI/CD, local dev environment, open source governance
-- **Phase 1 — Core Features** 🚧 Knowledge ingestion, semantic search, AI Q&A via CLI
+- **Phase 1 — Core Features** 🚧
+  - ✅ Auth & local setup (CLI onboarding, JWT, secure credential store)
+  - ✅ Knowledge Entry CRUD (REST API · types: `NOTE` / `LINK` / `PDF` / `GITHUB` · status lifecycle · tags · FTS)
+  - ✅ Ingestion foundation (REST API for text/url/file + metadata + validation + async URL worker)
+  - ✅ Indexing pipeline foundation (queue worker, event progress, reindex reliability, checkpoints)
+  - ✅ Ingestion Playground UI (`/ingest`) for manual endpoint testing
+  - ✅ Web landing page (Raycast/Linear design, responsive, animated)
+  - 🚧 Semantic retrieval and AI Q&A flows across CLI/Web
 - **Phase 2 — Intelligence** 📋 Semantic connections, tagging, summarization
 - **Phase 3 — Integrations** 📋 Telegram bot, GitHub issues, PDF ingestion
-- **Phase 4 — Polish** 📋 Web UI, multi-user support, cloud sync (opt-in)
+- **Phase 4 — Polish** 📋 Full Web app, multi-user support, cloud sync (opt-in)
 
 ---
 

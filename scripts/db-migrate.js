@@ -13,7 +13,18 @@ function resolveApiRoot() {
 }
 
 const apiRoot = resolveApiRoot();
-const databaseFile = path.resolve(apiRoot, 'local.db');
+
+function resolveDatabaseFile() {
+  const value = process.env.DATABASE_URL;
+  if (!value) {
+    return path.resolve(apiRoot, 'local.db');
+  }
+
+  const normalized = value.startsWith('file:') ? value.slice(5) : value;
+  return path.isAbsolute(normalized) ? normalized : path.resolve(apiRoot, normalized);
+}
+
+const databaseFile = resolveDatabaseFile();
 const migrationsDir = path.resolve(apiRoot, 'src', 'db', 'migrations');
 
 if (!fs.existsSync(migrationsDir)) {
@@ -58,12 +69,8 @@ for (const filename of migrationFiles) {
     continue;
   }
 
-  const tx = db.transaction(() => {
-    db.exec(sql);
-    db.prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)').run(filename, Date.now());
-  });
-
-  tx();
+  db.exec(sql);
+  db.prepare('INSERT INTO __kh_migrations (name, applied_at) VALUES (?, ?)').run(filename, Date.now());
   appliedCount += 1;
   console.log(`[db:migrate] aplicado: ${filename}`);
 }

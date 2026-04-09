@@ -1,30 +1,184 @@
 # Changelog
 
-Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
+All notable changes to this repository are documented in this file.
+
+## [v0.6.0] - 2026-03-16
+
+### Added
+
+- EPIC-1.4 indexing pipeline foundation in API:
+  - BullMQ indexing worker with step-based processing (`LOAD`, `SPLIT`, `EMBED`, `STORE`, `SUMMARIZE`, `TAG`).
+  - Indexing queue orchestration for create/update/reindex flows.
+  - Indexing progress events (`started`, `completed`, `failed`) and failure classification with permanent errors.
+  - Startup drain for pending indexing stubs and pending reindex maintenance jobs.
+  - Initial checkpoint persistence for indexing runs in `indexing_checkpoints`.
+
+### Changed
+
+- Reindex correlation now uses explicit queue job IDs across in-process and outbox paths.
+- Indexing payload now separates `aiModel` from `embeddingModel` to match `user_settings` and chunk metadata persistence.
+- Admin queue controller now uses lazy queue initialization and closes Redis connections on module shutdown.
+- Agent operational docs updated (`AGENTS.md`, `docs/agent/*`) to align with current release state and indexing delivery.
+
+### Fixed
+
+- Prevented archived entries from being revived by delayed indexing jobs (state-guarded status transitions).
+- Hardened multi-tenant safety in indexing writes:
+  - ownership validation in loader node (`entry.userId` vs `job.userId`);
+  - summary updates scoped by `entryId + userId`;
+  - chunk deletion scoped by `entryId + userId`.
+- Reduced startup log noise when Redis is unavailable during pending drain.
+- Added error logging in summary step fallback path (no silent swallow).
+- Removed duplicate stop-word entry and tightened indexing error typing (`IndexingStep`).
+
+## [v0.5.0] - 2026-03-14
+
+### Added
+
+- EPIC-1.3 ingestion foundation for API and Web:
+  - New API module `ingestion` with endpoints:
+    - `POST /api/v1/ingest/text`
+    - `POST /api/v1/ingest/url` (supports deduplication and `?force=true`)
+    - `POST /api/v1/ingest/file` (`.txt`, `.md`, `.pdf`)
+  - New DTOs/contracts for ingestion payload and response handling.
+  - New async ingestion queue and URL fetch worker flow.
+  - New loaders for `text`, `markdown`, `url`, and `pdf`, with loader factory abstraction.
+  - SSRF protection validator for public URL ingestion.
+  - New migration `0007_add_ingestion_metadata.sql` and schema updates for ingestion metadata.
+- Shared packages:
+  - `packages/shared-types`: new `ingestion.types.ts` with loader interfaces and metadata contracts.
+  - `packages/shared-utils`: new `fingerprint-content.ts` and `with-retry.ts`.
+- Web:
+  - New ingestion validation interface at `apps/web/app/ingest/page.tsx` (Ingestion Playground).
+  - UI supports token generation helper, endpoint testing (`text/url/file`), request history, and response inspection.
+
+### Changed
+
+- API configuration and module wiring to support ingestion runtime options and queue processing.
+- Knowledge contracts/repository integration to persist and expose ingestion-related metadata.
+- Auth module/controller updated to support local token generation flow used by ingestion validation UI.
+- Documentation alignment with current product state, command references, and validation guidelines.
+
+### Fixed
+
+- Ingestion services improved with stronger error handling and payload validation.
+- URL, text, and file loaders hardened for more predictable extraction and failure behavior.
+- Test/build execution flow adjustments in `apps/api/package.json` and `turbo.json` to reduce test task friction.
+
+### Dependencies
+
+- Production dependency bump group (9 updates) across workspaces.
+- Development dependency bump group (5 updates) with lockfile refresh.
+
+## [v0.4.2] - 2026-03-08
+
+### Added
+
+- EPIC-1.2: Full Knowledge Entry CRUD module in the NestJS API.
+  - Endpoints: `POST /api/v1/knowledge`, `GET`, `GET /:id`, `PATCH /:id`, `DELETE /:id` (archive), `POST /:id/reindex`.
+  - Supported entry types: `NOTE`, `LINK`, `PDF`, `GITHUB`.
+  - Status lifecycle: `PENDING` → `INDEXING` → `INDEXED` · soft-archive via `DELETE` → `ARCHIVED` · reindexing via `/reindex`.
+  - Tags with automatic normalization and deduplication.
+  - Full-text search (FTS) via SQLite `fts5` with `q` filter support on paginated listing.
+  - `safe-file-path.validator.ts` for secure file path validation.
+  - `pagination-helper.service.ts` and `title-generator.service.ts` as shared services.
+  - `indexing-outbox.service.ts` for async indexing task queuing.
+  - Database migrations: `0003_knowledge_entry_crud.sql`, `0004_knowledge_entry_epic_1_2_alignment.sql`, `0005_knowledge_fts_index.sql`.
+  - Test suite: 8 integration specs + 2 unit specs for the knowledge and tags modules.
+- `packages/shared-types`: new types `knowledge.types.ts` (`KnowledgeEntryType`, `KnowledgeEntryStatus`, `KnowledgeEntryResponse`, etc.) and `events.types.ts`.
+- `packages/shared-utils`: new `knowledge-query.ts` utility with `buildKnowledgeListQuery` helper.
+- Web: full landing page redesign (Raycast/Linear style, dark theme, responsive).
+  - New components: `NavBar` (sticky, frosted glass, mobile drawer), `Footer` (links, tech badges).
+  - Sections: Hero (mouse-tracking spotlight, animated orbs, typewriter terminal), Stats (animated counters), Value, WhyLocal (stagger scroll), Workflow, Audience, TechBadges, FinalCta.
+  - Animation library: `framer-motion` + CSS keyframes (`orbDrift`, `gradientShimmer`).
+  - Color token: `--kh-accent` updated to `#c8913a` (amber-gold) for semantic alignment with "knowledge / wisdom".
+  - Landing page screenshot: `resources/home-page-v1.png`.
+- `apps/web/src/lib/motion-presets.ts`: reusable Framer Motion animation presets.
+- `docs/testing/epic-1.2-validation.md`: manual validation guide for EPIC-1.2.
+
+### Changed
+
+- `apps/api/src/db/schema.ts`: `knowledge_entries` table with full fields, FK to `users`, indexes, and FTS support.
+- `apps/api/src/main.ts`: Swagger enabled with `Knowledge` tag and Bearer security configuration.
+- `apps/web/app/layout.tsx`: Inter font via `next/font/google` and full metadata export.
+- `apps/web/app/globals.css`: design system extended with new utility classes and keyframes.
+
+### Fixed
+
+- Knowledge API: `GITHUB` source validation hardened to allow only `github.com` and `*.github.com` hosts.
+- Knowledge API/DB: alignment between PDF payload validation and migrated schema via `0006_allow_pdf_filepath_only.sql`.
+- FTS maintenance: update trigger now executes only when `title`, `content`, or `user_id` changes.
+- Tags sync: removed per-tag full-list re-fetch loop in `TagsService` (`N+1` reduction).
+- Knowledge repository: tag sorting in `loadTagsByEntryIds` now runs once per entry after accumulation.
+- Shared contracts/utilities:
+  - `EntryCreatedEvent.type` now reuses `KnowledgeEntryType`.
+  - SQLite `normalize_search` UDF now reuses shared `normalizeSearchText`.
+  - `TitleGeneratorService` now reuses shared `createNoteTitle`.
+- Docs: removed machine-specific local path from `docs/testing/epic-1.2-validation.md`.
+
+## [v0.4.1] - 2026-03-04
+
+### Fixed
+
+- Auth: refresh token rotation without redundant lookup, using persisted `refreshId` to chain `replacedByTokenId`.
+- Auth: lazy DB initialization in `AuthService` to prevent constructor failures during tests/CI.
+- Credential Store: lazy loading of `keytar` to avoid rejected promise on startup when the optional dependency is absent.
+- Health: `/api/v1/health` endpoint with consistent response matching the custom contract (`ok`/`degraded` with `200`, `error` with `503`) without Terminus interception.
+- API DB client: automatic creation of the SQLite parent directory before opening the file (`better-sqlite3`), fixing CI failures.
+- CLI setup: error handling with `spinner.fail(...)` in the secrets storage block.
+- CLI setup: `ecosystem.config.js` passes `DATABASE_URL` explicitly to align the API with the database provisioned during setup.
+- CLI setup: final messages with explicit `Web URL` and `API URL`, including a security note about `clientId` vs `clientSecret`.
+- Auth rate-limit config: removed dead export `TOKEN_RATE_LIMIT_KEY`.
+
+### Changed
+
+- CI: Node.js pinned to `20` (LTS) in `lint`, `build`, and `test` jobs for greater pipeline stability.
+- API env/docs: `DATABASE_URL` default aligned to the user's local database (`file:~/.knowhub/data/knowhub.db`).
+
+## [v0.4.0] - 2026-03-04
+
+### Added
+
+- EPIC-1.1: local-first `setup` with identity generation, secure secret persistence, and configuration bootstrap.
+- `Auth`, `Health`, and `Settings` modules in the API with routes `/api/v1/auth/*`, `/api/v1/health`, and `/api/v1/settings*`.
+- Shared auth/health/settings contracts in `packages/shared-types`.
+- Migration for `refresh_tokens` (stateful rotation/revocation) and `embedding_model` field.
+
+### Changed
+
+- Auth security hardening: timing-safe credential comparison, stabilized latency on failures, and local rate limiting.
+- Healthcheck aligned to the PRD contract with aggregated status, `version`, `uptime`, and explicit degradation for optional dependencies.
+- Settings with embedding compatibility warning support and model listing with TTL cache.
+- Setup CLI with programmatic migration application, visual feedback (`ora`), and `ecosystem.config.js` generation for PM2.
+
+### Fixed
+
+- Fixed refresh token flow and revocation in the authentication lifecycle.
+- Fixed idempotent bootstrap of user/settings during setup.
 
 ## [v0.3.0] - 2026-03-02
 
 ### Added
 
-- Epic 0.3 de ambiente local com endpoints `/dev/*` para status, schema, seed e reset controlado.
-- Scripts dedicados para banco local: `db:migrate`, `db:seed` e `db:reset`.
-- Exemplos de configuracao de ambiente para bootstrap local.
+- Epic 0.3 local environment with `/dev/*` endpoints for status, schema, seed, and controlled reset.
+- Dedicated local database scripts: `db:migrate`, `db:seed`, and `db:reset`.
+- Environment configuration examples for local bootstrap.
 
 ### Changed
 
-- Refactor no fluxo de migracao/boot do SQLite com controle de versao de schema e calculo de migrations pendentes.
-- Validacao de variaveis de ambiente com suporte a `defaultValue` e validacao em runtime dos payloads.
-- Gating de endpoints de desenvolvimento por ambiente para reduzir risco fora de `development`.
+- Refactored SQLite migration/boot flow with schema version control and pending migration calculation.
+- Environment variable validation with `defaultValue` support and runtime payload validation.
+- Development endpoint gating by environment to reduce risk outside of `development`.
 
 ### Fixed
 
-- Fluxo de bootstrap local em Windows/OneDrive com execucao mais robusta dos scripts Node.
-- Seeds de banco para comportamento deterministico.
+- Local bootstrap flow on Windows/OneDrive with more robust Node script execution.
+- Database seeds for deterministic behavior.
 
 ### Dependencies
 
-- Atualizacoes de dependencias de producao e desenvolvimento via Dependabot.
-- Atualizacoes de GitHub Actions (`checkout`, `setup-node`, `upload-artifact`, `stale`, `first-interaction`).
+- Production and development dependency updates via Dependabot.
+- GitHub Actions updates (`checkout`, `setup-node`, `upload-artifact`, `stale`, `first-interaction`).
 
 ### PR
 
@@ -49,9 +203,9 @@ Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
 ### Changed
 
-- Atualizacao do `codecov-action` para `v5` no pipeline de CI.
-- Melhoria no `merge-gate` para exibir status detalhado de `lint`, `build` e `test`.
-- Condicionamento do upload para Codecov a existencia de `CODECOV_TOKEN`.
+- Updated `codecov-action` to `v5` in the CI pipeline.
+- Improved `merge-gate` to display detailed status for `lint`, `build`, and `test`.
+- Conditioned Codecov upload on the existence of `CODECOV_TOKEN`.
 
 ### Commits
 
@@ -61,13 +215,13 @@ Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
 ### Added
 
-- Automacao de CI/CD com workflows de validacao e release.
-- Templates de issue/PR e governanca de contribuicao (`CODEOWNERS`).
+- CI/CD automation with validation and release workflows.
+- Issue/PR templates and contribution governance (`CODEOWNERS`).
 
 ### Changed
 
-- Ajustes na configuracao de CI e templates de PR.
-- Inclusao de dependencia de `shared-types` no `shared-utils`.
+- CI configuration adjustments and PR template updates.
+- Added `shared-types` as a dependency of `shared-utils`.
 
 ### PR
 
@@ -82,7 +236,7 @@ Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
 ### Changed
 
-- Correcao de comentarios de review e ajustes de compatibilidade cross-platform para configuracao web.
+- Fixed review comments and cross-platform compatibility adjustments for web configuration.
 
 ### PR
 
@@ -96,11 +250,11 @@ Todas as mudancas relevantes deste repositorio sao registradas neste arquivo.
 
 ### Added
 
-- Inicializacao do monorepo com `apps` e `packages` compartilhados.
+- Monorepo initialization with shared `apps` and `packages`.
 
 ### Changed
 
-- Refactor na avaliacao de readiness e ajustes de `tsconfig`.
+- Refactored readiness evaluation logic and `tsconfig` adjustments.
 
 ### PR
 

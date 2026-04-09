@@ -9,3 +9,7 @@ export function readApiEnvironmentConfig(): ApiEnvironmentConfig {
     nodeEnv: process.env.NODE_ENV ?? 'development',
   };
 }
+
+export * from './knowhub-config.service';
+export * from './knowhub-config.module';
+export * from './credential-store.service';

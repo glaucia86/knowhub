@@ -3,6 +3,7 @@ import { getDatabaseClient } from './database.client';
 import {
   connectionEdges,
   contentChunks,
+  entryTags,
   knowledgeEntries,
   maintenanceJobs,
   tags,
@@ -66,7 +67,7 @@ export function runDevelopmentSeed(): SeedSummary {
       type: 'NOTE' as const,
       title: 'Best practices for integration',
       content: 'Local flow with env setup, compose up, and database bootstrap.',
-      status: 'active' as const,
+      status: 'INDEXED' as const,
     },
     {
       id: 'entry-link-1',
@@ -74,7 +75,7 @@ export function runDevelopmentSeed(): SeedSummary {
       title: 'NestJS docs',
       sourceUrl: 'https://docs.nestjs.com',
       content: 'Reference for controllers and modules.',
-      status: 'active' as const,
+      status: 'INDEXED' as const,
     },
     {
       id: 'entry-pdf-1',
@@ -82,7 +83,7 @@ export function runDevelopmentSeed(): SeedSummary {
       title: 'PRD EPIC-0.3',
       filePath: 'docs-specs/PRD-EPIC-0.3.md',
       content: 'Scope of the local onboarding.',
-      status: 'active' as const,
+      status: 'INDEXED' as const,
     },
   ];
 
@@ -126,6 +127,14 @@ export function runDevelopmentSeed(): SeedSummary {
     .onConflictDoNothing()
     .run();
 
+  db.insert(entryTags)
+    .values({
+      entryId: 'entry-note-1',
+      tagId: 'tag-onboarding',
+    })
+    .onConflictDoNothing()
+    .run();
+
   db.insert(connectionEdges)
     .values({
       id: 'edge-1',
@@ -141,7 +150,7 @@ export function runDevelopmentSeed(): SeedSummary {
   db.insert(maintenanceJobs)
     .values({
       id: 'job-initial-index',
-      type: 'reindex',
+      type: 'REINDEX',
       status: 'completed',
       payload: JSON.stringify({ reason: 'initial-seed' }),
       result: JSON.stringify({ chunksIndexed: 1 }),
