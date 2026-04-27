@@ -44,7 +44,7 @@
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.0",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.1.0",
     "lint-staged": "^16.3.2",
     "prettier": "^3.0.0",
     "roughjs": "^4.6.6",
