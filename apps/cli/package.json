@@ -23,10 +23,10 @@
   "dependencies": {
     "@knowhub/shared-types": "0.1.0",
     "@knowhub/shared-utils": "0.1.0",
-    "better-sqlite3": "^12.8.0",
-    "commander": "^14.0.3",
-    "ora": "^9.3.0",
-    "zod": "^4.3.6"
+    "better-sqlite3": "^12.10.0",
+    "commander": "^15.0.0",
+    "ora": "^9.4.0",
+    "zod": "^4.4.3"
   },
   "optionalDependencies": {
     "keytar": "^7.9.0"
