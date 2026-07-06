@@ -39,17 +39,17 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^10.0.3",
+    "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.0",
     "jsdom": "^28.1.0",
-    "lint-staged": "^16.3.2",
-    "prettier": "^3.0.0",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.4",
     "roughjs": "^4.6.6",
-    "turbo": "^2.8.14",
-    "typescript": "^5.0.0"
+    "turbo": "^2.10.3",
+    "typescript": "^6.0.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
